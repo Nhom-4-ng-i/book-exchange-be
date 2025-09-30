@@ -1,8 +1,6 @@
-### 🔧 `Exchange-old-books-be/README.md`  
+### 🔧 Exchange Old Books BE 
 
 ```markdown
-# 🔧 Exchange Old Books BE
-
 ## Mô tả
 Repo này chứa mã nguồn **backend** của dự án.  
 Backend cung cấp API, xử lý logic nghiệp vụ và quản lý cơ sở dữ liệu.  
