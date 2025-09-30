@@ -12,6 +12,5 @@ Backend cung cấp API, xử lý logic nghiệp vụ và quản lý cơ sở d�
 - Database schema và migration.  
 
 ## Cách chạy
-```bash
 npm install
 npm run dev
