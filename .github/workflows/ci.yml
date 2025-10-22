@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           # Dùng Python 3.11 giống như log lỗi của bạn
           # (Bạn có thể đổi thành '3.13' nếu muốn)
