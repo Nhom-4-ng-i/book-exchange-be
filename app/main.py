@@ -2,14 +2,16 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from app.api.router import api_router
-from app.core.config import Settings
+from app.core.config import get_settings
+from app.services.supabase import get_supabase
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
         # Init
-        settings = Settings()
+        get_settings()
+        get_supabase()
 
         # Running
         yield
