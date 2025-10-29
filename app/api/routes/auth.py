@@ -10,14 +10,13 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def sign_up(auth_request: SignUpRequest):
     supabase = get_supabase()
     email = auth_request.email
-    password = auth_request.password
     name = auth_request.name
 
     try:
         response = supabase.auth.sign_up(
             {
                 "email": email,
-                "password": password,
+                "password": "password",
             }
         )
 
@@ -33,13 +32,12 @@ async def sign_up(auth_request: SignUpRequest):
 async def sign_in(auth_request: SignInRequest):
     supabase = get_supabase()
     email = auth_request.email
-    password = auth_request.password
 
     try:
         response = supabase.auth.sign_in_with_password(
             {
                 "email": email,
-                "password": password,
+                "password": "password",
             }
         )
         
