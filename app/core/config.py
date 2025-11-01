@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from functools import lru_cache
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -8,4 +8,11 @@ class Settings(BaseSettings):
         case_sensitive=True
     )
 
-    PROJECT_NAME: str
+    SUPABASE_URL: str
+    SUPABASE_ANON_KEY: str
+    SUPABASE_PASSWORD: str
+
+
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()
