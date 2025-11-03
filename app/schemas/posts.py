@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 
 
@@ -12,10 +12,12 @@ class SortBy(Enum):
 class Status(Enum):
     ACTIVE = "active"
     SOLD = "sold"
+    TRADING = "trading"
 
 
 class SearchRequest(BaseModel):
-    book_title: str
+    status: List[Status] = [Status.ACTIVE]
+    book_title: Optional[str] = None
     author: Optional[str] = None
     publisher: Optional[str] = None
     location: Optional[str] = None
