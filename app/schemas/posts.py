@@ -8,6 +8,12 @@ class SortBy(Enum):
     PRICE_ASC = "price_asc"
     PRICE_DESC = "price_desc"
 
+
+class Status(Enum):
+    ACTIVE = "active"
+    SOLD = "sold"
+
+
 class SearchRequest(BaseModel):
     book_title: str
     author: Optional[str] = None
@@ -18,4 +24,3 @@ class SearchRequest(BaseModel):
     sort_by: SortBy = SortBy.NEWEST
     offset: int = 0
     limit: int = 10
-
