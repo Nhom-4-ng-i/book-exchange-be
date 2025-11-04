@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from enum import Enum
-
+from datetime import datetime
 
 class SortBy(Enum):
     NEWEST = "newest"
@@ -26,3 +26,12 @@ class SearchRequest(BaseModel):
     sort_by: SortBy = SortBy.NEWEST
     offset: int = 0
     limit: int = 10
+
+class PostDetailResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    price: float
+    image_url: str
+    created_at: datetime
+    seller_name: str
