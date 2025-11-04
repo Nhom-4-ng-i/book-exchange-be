@@ -30,9 +30,7 @@ class BookStatus(Enum):
 
 
 class Course(Enum):
-    CALCULUS1 = "Giải tích 1"
-    CALCULUS2 = "Giải tích 2"
-    CALCULUS3 = "Giải tích 3"
+    CALCULUS = "Giải tích"
     LINEAR_ALGEBRA = "Đại số tuyến tính"
     PROBABILITY_AND_STATISTICS = "Xác suất và thống kê"
     DISCRETE_MATHEMATICS = "Toán rời rạc"
@@ -45,18 +43,21 @@ class Course(Enum):
 class InsertPostRequest(BaseModel):
     book_title: str
     author: str
-    publisher: str
-    location: Location
+    course: Course
+    book_status: BookStatus
     price: int
     original_price: Optional[int] = None
-    book_status: BookStatus
+    description: Optional[str] = None
+    location: Location
+    location_detail: Optional[str] = None
 
 
 class SearchRequest(BaseModel):
     status: List[Status] = [Status.ACTIVE]
     book_title: Optional[str] = None
     author: Optional[str] = None
-    publisher: Optional[str] = None
+    course: Optional[Course] = None
+    book_status: Optional[BookStatus] = None
     location: Optional[str] = None
     min_price: Optional[int] = None
     max_price: Optional[int] = None
