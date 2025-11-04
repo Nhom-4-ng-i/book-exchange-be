@@ -1,9 +1,15 @@
 from fastapi import APIRouter
 from app.schemas.posts import SearchRequest, InsertPostRequest, SortBy
-from app.crud.posts import search_posts, insert_post
+from app.crud.posts import search_posts, insert_post, get_post_by_id
 
 
 router = APIRouter(prefix="/posts", tags=["posts"])
+
+
+@router.get(f"/{int:post_id}")
+async def get_post_route(post_id: int):
+    response = get_post_by_id(post_id=post_id)
+    return response
 
 
 @router.post("/")

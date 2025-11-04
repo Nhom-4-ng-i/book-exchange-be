@@ -3,6 +3,18 @@ from app.services.supabase import get_supabase
 from app.schemas.posts import Status, Course, BookStatus, Location
 
 
+def get_post_by_id(post_id: int):
+    supabase = get_supabase()
+    return (
+        supabase
+        .table("posts")
+        .select("*")
+        .eq("post_id", post_id)
+        .single()
+        .execute()
+    ).data
+
+
 def insert_post(book_title: str, author: str, course: Course, book_status: BookStatus, price: int, location: Location, location_detail: Optional[str] = None, original_price: Optional[int] = None, description: Optional[str] = None):
     supabase = get_supabase()
     supabase.table("posts").insert({
