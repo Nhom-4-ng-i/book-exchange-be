@@ -1,8 +1,24 @@
+from typing import Optional, List
 from app.services.supabase import get_supabase
 from app.schemas.posts import Status, Course, BookStatus, Location
 
 
-def search_posts(status: Status, book_title: str, author: str, course: Course, book_status: BookStatus, location: Location, min_price: int, max_price: int):
+def insert_post(book_title: str, author: str, course: Course, book_status: BookStatus, price: int, location: Location, location_detail: Optional[str] = None, original_price: Optional[int] = None, description: Optional[str] = None):
+    supabase = get_supabase()
+    supabase.table("posts").insert({
+        "book_title": book_title,
+        "author": author,
+        "course": course,
+        "book_status": book_status,
+        "price": price,
+        "original_price": original_price,
+        "description": description,
+        "location": location,
+        "location_detail": location_detail,
+    }).execute()
+
+
+def search_posts(status: List[Status], book_title: Optional[str] = None, author: Optional[str] = None, course: Optional[Course] = None, book_status: Optional[BookStatus] = None, location: Optional[Location] = None, min_price: Optional[int] = None, max_price: Optional[int] = None):
     supabase = get_supabase()
 
     # Search with filters

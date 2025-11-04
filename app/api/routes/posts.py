@@ -1,9 +1,24 @@
 from fastapi import APIRouter
-from app.schemas.posts import SearchRequest, SortBy
-from app.crud.posts import search_posts
+from app.schemas.posts import SearchRequest, InsertPostRequest, SortBy
+from app.crud.posts import search_posts, insert_post
 
 
 router = APIRouter(prefix="/posts", tags=["posts"])
+
+
+@router.post("/")
+async def insert_post_route(insert_post_request: InsertPostRequest):
+    insert_post(
+        book_title=insert_post_request.book_title,
+        author=insert_post_request.author,
+        course=insert_post_request.course.value,
+        book_status=insert_post_request.book_status.value,
+        price=insert_post_request.price,
+        location=insert_post_request.location.value,
+        location_detail=insert_post_request.location_detail,
+        original_price=insert_post_request.original_price,
+        description=insert_post_request.description
+    )
 
 
 @router.post("/search")
@@ -12,9 +27,9 @@ async def search_posts_route(search_request: SearchRequest):
         status=search_request.status,
         book_title=search_request.book_title,
         author=search_request.author,
-        course=search_request.course,
-        book_status=search_request.book_status,
-        location=search_request.location,
+        course=search_request.course.value,
+        book_status=search_request.book_status.value,
+        location=search_request.location.value,
         min_price=search_request.min_price,
         max_price=search_request.max_price
     )
