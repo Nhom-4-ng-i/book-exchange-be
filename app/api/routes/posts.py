@@ -8,8 +8,16 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 @router.post("/search")
 async def search_posts_route(search_request: SearchRequest):
-    results = search_posts(status=search_request.status, book_title=search_request.book_title, author=search_request.author, publisher=search_request.publisher,
-                           location=search_request.location, min_price=search_request.min_price, max_price=search_request.max_price)
+    results = search_posts(
+        status=search_request.status,
+        book_title=search_request.book_title,
+        author=search_request.author,
+        course=search_request.course,
+        book_status=search_request.book_status,
+        location=search_request.location,
+        min_price=search_request.min_price,
+        max_price=search_request.max_price
+    )
 
     if search_request.sort_by == SortBy.NEWEST:
         results = sorted(results, key=lambda x: x["created_at"], reverse=True)
