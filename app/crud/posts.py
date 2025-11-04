@@ -1,8 +1,8 @@
 from app.services.supabase import get_supabase
-from app.schemas.posts import Status
+from app.schemas.posts import Status, Course, BookStatus, Location
 
 
-def search_posts(status: Status, book_title: str, author: str, publisher: str, location: str, min_price: int, max_price: int):
+def search_posts(status: Status, book_title: str, author: str, course: Course, book_status: BookStatus, location: Location, min_price: int, max_price: int):
     supabase = get_supabase()
 
     # Search with filters
@@ -17,8 +17,10 @@ def search_posts(status: Status, book_title: str, author: str, publisher: str, l
 
         if author:
             response = [x for x in response if x["author"] == author]
-        if publisher:
-            response = [x for x in response if x["publisher"] == publisher]
+        if course:
+            response = [x for x in response if x["course"] == course]
+        if book_status:
+            response = [x for x in response if x["book_status"] == book_status]
         if location:
             response = [x for x in response if x["location"] == location]
         if min_price:
@@ -27,7 +29,7 @@ def search_posts(status: Status, book_title: str, author: str, publisher: str, l
             response = [x for x in response if x["price"] <= max_price]
         return response
 
-    # Get all posts with status
+    # Search all posts with
     else:
         response = (
             supabase.table("posts")
