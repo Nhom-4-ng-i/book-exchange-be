@@ -1,6 +1,6 @@
-from fastapi import APIRouter
-from app.schemas.posts import SearchRequest, SortBy
-from app.crud.posts import search_posts
+from fastapi import APIRouter, HTTPException
+from app.schemas.posts import SearchRequest, SortBy, PostDetailResponse
+from app.crud.posts import search_posts, get_post_detail
 
 
 router = APIRouter(prefix="/posts", tags=["posts"])
@@ -19,3 +19,14 @@ async def search_posts_route(search_request: SearchRequest):
         results = sorted(results, key=lambda x: x["price"], reverse=True)
 
     return results[search_request.offset:search_request.offset + search_request.limit]
+
+@router.get("/{post_id}", response_model=PostDetailResponse)
+def read_post_detail(post_id: int):
+    """Return detailed information about a single post by id.
+
+    Uses `get_post_detail` from the CRUD layer which queries Supabase.
+    """
+    post = get_post_detail(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return post
