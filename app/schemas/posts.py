@@ -50,6 +50,8 @@ class InsertPostRequest(BaseModel):
     description: Optional[str] = None
     location: Location
     location_detail: Optional[str] = None
+    avatar_url: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 class SearchRequest(BaseModel):

@@ -1,30 +1,36 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.posts import SearchRequest, InsertPostRequest, SortBy
 from app.crud.posts import search_posts, insert_post, get_post_by_id
+from utils.get_token import get_current_user_id
 
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
 
-@router.get(f"/{int:post_id}")
+@router.get("/{post_id}")
 async def get_post_route(post_id: int):
     response = get_post_by_id(post_id=post_id)
     return response
 
 
 @router.post("/")
-async def insert_post_route(insert_post_request: InsertPostRequest):
-    insert_post(
-        book_title=insert_post_request.book_title,
-        author=insert_post_request.author,
-        course=insert_post_request.course.value,
-        book_status=insert_post_request.book_status.value,
-        price=insert_post_request.price,
-        location=insert_post_request.location.value,
-        location_detail=insert_post_request.location_detail,
-        original_price=insert_post_request.original_price,
-        description=insert_post_request.description
-    )
+async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str = Depends(get_current_user_id)):
+    try:
+        insert_post(
+            book_title=insert_post_request.book_title,
+            author=insert_post_request.author,
+            course=insert_post_request.course.value,
+            book_status=insert_post_request.book_status.value,
+            price=insert_post_request.price,
+            location=insert_post_request.location.value,
+            location_detail=insert_post_request.location_detail,
+            original_price=insert_post_request.original_price,
+            description=insert_post_request.description,
+            user_id=user_id
+        )
+        return {"ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/search")
