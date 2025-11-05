@@ -66,3 +66,19 @@ class SearchRequest(BaseModel):
     sort_by: SortBy = SortBy.NEWEST
     offset: int = 0
     limit: int = 10
+
+class PostDetailResponse(BaseModel):
+    id: int
+    title: str
+    description: Optional[str] = None
+    price: float
+    created_at: Optional[str] = None
+    seller_name: Optional[str] = None
+    author: Optional[str] = None
+    course: Optional[Course] = None
+    location: Optional[str] = None
+    status: Optional[Status] = None
+    book_status: Optional[BookStatus] = None
+    original_price: Optional[float] = None
+    location_detail: Optional[str] = None
+    avatar: Optional[str] = None

@@ -6,14 +6,41 @@ from app.services.cloudinary_client import upload_image_to_cloudinary
 
 def get_post_by_id(post_id: int):
     supabase = get_supabase()
-    return (
+    # fetch post
+    res = (
         supabase
         .table("posts")
         .select("*")
         .eq("post_id", post_id)
         .single()
         .execute()
-    ).data
+    )
+    post = res.data
+    if not post:
+        return None
+
+    seller_name = None
+    user_id = post.get("user_id")
+    if user_id:
+        try:
+            profile_res = (
+                supabase
+                .table("profiles")
+                .select("name")
+                .eq("user_id", user_id)
+                .single()
+                .execute()
+            )
+            profile = profile_res.data
+            if profile:
+                # prefer 'name' field, fallback to 'full_name' if present
+                seller_name = profile.get("name")
+        except Exception:
+            seller_name = None
+
+    # attach seller_name to returned post dict
+    post["seller_name"] = seller_name
+    return post
 
 
 def insert_post(book_title: str, author: str, course: Course, book_status: BookStatus, price: int, location: Location, location_detail: Optional[str] = None, original_price: Optional[int] = None, description: Optional[str] = None, avatar: Optional[Any] = None, user_id: Optional[str] = None):
