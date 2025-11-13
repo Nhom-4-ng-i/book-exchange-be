@@ -15,11 +15,51 @@ class Status(Enum):
     TRADING = "trading"
 
 
+class Location(Enum):
+    HCMUT = "hcmut"
+    HCMUS = "hcmus"
+    HCMUTE = "hcmute"
+    FTU = "ftu"
+
+
+class BookStatus(Enum):
+    UNUSED = "Mới - chưa sử dụng"
+    UNREAD = "Chưa đọc - nguyên seal"
+    USED = "Khá - đã sử dụng ít"
+    DAMAGED = "Rách - có dấu hiệu cũ"
+
+
+class Course(Enum):
+    CALCULUS = "Giải tích"
+    LINEAR_ALGEBRA = "Đại số tuyến tính"
+    PROBABILITY_AND_STATISTICS = "Xác suất và thống kê"
+    DISCRETE_MATHEMATICS = "Toán rời rạc"
+    DATABASE_SYSTEM = "Hệ cơ sở dữ liệu"
+    OPERATING_SYSTEM = "Hệ điều hành"
+    COMPUTER_NETWORK = "Mạng máy tính"
+    COMPUTER_ARCHITECTURE = "Kiến trúc máy tính"
+
+
+class InsertPostRequest(BaseModel):
+    book_title: str
+    author: str
+    course: Course
+    book_status: BookStatus
+    price: int
+    original_price: Optional[int] = None
+    description: Optional[str] = None
+    location: Location
+    location_detail: Optional[str] = None
+    avatar_url: Optional[str] = None
+    user_id: Optional[str] = None
+
+
 class SearchRequest(BaseModel):
     status: List[Status] = [Status.ACTIVE]
     book_title: Optional[str] = None
     author: Optional[str] = None
-    publisher: Optional[str] = None
+    course: Optional[Course] = None
+    book_status: Optional[BookStatus] = None
     location: Optional[str] = None
     min_price: Optional[int] = None
     max_price: Optional[int] = None
@@ -28,17 +68,17 @@ class SearchRequest(BaseModel):
     limit: int = 10
 
 class PostDetailResponse(BaseModel):
-    post_id: int
+    id: int
     title: str
-    description: str
+    description: Optional[str] = None
     price: float
-    avatar: str
-    created_at: datetime
-    seller_name: str
-    author: str
-    course: str
-    location: str
-    status: str
-    book_status: str
-    original_price: float
-    location_detail: str
+    created_at: Optional[str] = None
+    seller_name: Optional[str] = None
+    author: Optional[str] = None
+    course: Optional[Course] = None
+    location: Optional[str] = None
+    status: Optional[Status] = None
+    book_status: Optional[BookStatus] = None
+    original_price: Optional[float] = None
+    location_detail: Optional[str] = None
+    avatar: Optional[str] = None

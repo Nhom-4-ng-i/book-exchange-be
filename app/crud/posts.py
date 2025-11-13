@@ -1,9 +1,84 @@
+from typing import Optional, List, Any
 from app.services.supabase import get_supabase
+from app.schemas.posts import Status, Course, BookStatus, Location
+from app.services.cloudinary_client import upload_image_to_cloudinary
+
 from app.schemas.posts import Status
 from typing import Optional
 from datetime import datetime
 
-def search_posts(status: Status, book_title: str, author: str, publisher: str, location: str, min_price: int, max_price: int):
+def get_post_by_id(post_id: int):
+    supabase = get_supabase()
+    # fetch post
+    res = (
+        supabase
+        .table("posts")
+        .select("*")
+        .eq("post_id", post_id)
+        .single()
+        .execute()
+    )
+    post = res.data
+    if not post:
+        return None
+
+    seller_name = None
+    user_id = post.get("user_id")
+    if user_id:
+        try:
+            profile_res = (
+                supabase
+                .table("profiles")
+                .select("name")
+                .eq("user_id", user_id)
+                .single()
+                .execute()
+            )
+            profile = profile_res.data
+            if profile:
+                # prefer 'name' field, fallback to 'full_name' if present
+                seller_name = profile.get("name")
+        except Exception:
+            seller_name = None
+
+    # attach seller_name to returned post dict
+    post["seller_name"] = seller_name
+    return post
+
+
+def insert_post(book_title: str, author: str, course: Course, book_status: BookStatus, price: int, location: Location, location_detail: Optional[str] = None, original_price: Optional[int] = None, description: Optional[str] = None, avatar: Optional[Any] = None, user_id: Optional[str] = None):
+    supabase = get_supabase()
+
+    avatar_url = None
+    if avatar:
+        if isinstance(avatar, str) and (avatar.startswith('http://') or avatar.startswith('https://')):
+            avatar_url = avatar
+        else:
+            try:
+                avatar_url = upload_image_to_cloudinary(avatar)
+            except Exception:
+                avatar_url = None
+
+    payload = {
+        "book_title": book_title,
+        "author": author,
+        "course": course,
+        "book_status": book_status,
+        "price": price,
+        "original_price": original_price,
+        "description": description,
+        "location": location,
+        "location_detail": location_detail,
+    }
+    if user_id:
+        payload['user_id'] = user_id
+    if avatar_url:
+        payload['avatar'] = avatar_url
+
+    supabase.table("posts").insert(payload).execute()
+
+
+def search_posts(status: List[Status], book_title: Optional[str] = None, author: Optional[str] = None, course: Optional[Course] = None, book_status: Optional[BookStatus] = None, location: Optional[Location] = None, min_price: Optional[int] = None, max_price: Optional[int] = None):
     supabase = get_supabase()
 
     # Search with filters
@@ -18,8 +93,10 @@ def search_posts(status: Status, book_title: str, author: str, publisher: str, l
 
         if author:
             response = [x for x in response if x["author"] == author]
-        if publisher:
-            response = [x for x in response if x["publisher"] == publisher]
+        if course:
+            response = [x for x in response if x["course"] == course]
+        if book_status:
+            response = [x for x in response if x["book_status"] == book_status]
         if location:
             response = [x for x in response if x["location"] == location]
         if min_price:
@@ -28,7 +105,7 @@ def search_posts(status: Status, book_title: str, author: str, publisher: str, l
             response = [x for x in response if x["price"] <= max_price]
         return response
 
-    # Get all posts with status
+    # Search all posts with
     else:
         response = (
             supabase.table("posts")
