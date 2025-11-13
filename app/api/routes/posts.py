@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.posts import SearchRequest, InsertPostRequest, SortBy
-from app.crud.posts import search_posts, insert_post, get_post_by_id
-from utils.get_token import get_current_user_id
+from app.crud.posts import search_posts, insert_post, get_post_by_id, get_post_detail
+from app.schemas.posts import PostDetailResponse
+from app.utils.get_token import get_current_user_id
 
 
 router = APIRouter(prefix="/posts", tags=["posts"])
@@ -54,6 +55,7 @@ async def search_posts_route(search_request: SearchRequest):
         results = sorted(results, key=lambda x: x["price"], reverse=True)
 
     return results[search_request.offset:search_request.offset + search_request.limit]
+
 
 @router.get("/{post_id}", response_model=PostDetailResponse)
 def read_post_detail(post_id: int):
