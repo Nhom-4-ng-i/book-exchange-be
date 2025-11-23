@@ -3,6 +3,7 @@ from typing import Optional, List
 from enum import Enum
 from datetime import datetime
 
+
 class SortBy(Enum):
     NEWEST = "newest"
     PRICE_ASC = "price_asc"
@@ -29,21 +30,10 @@ class BookStatus(Enum):
     DAMAGED = "Rách - có dấu hiệu cũ"
 
 
-class Course(Enum):
-    CALCULUS = "Giải tích"
-    LINEAR_ALGEBRA = "Đại số tuyến tính"
-    PROBABILITY_AND_STATISTICS = "Xác suất và thống kê"
-    DISCRETE_MATHEMATICS = "Toán rời rạc"
-    DATABASE_SYSTEM = "Hệ cơ sở dữ liệu"
-    OPERATING_SYSTEM = "Hệ điều hành"
-    COMPUTER_NETWORK = "Mạng máy tính"
-    COMPUTER_ARCHITECTURE = "Kiến trúc máy tính"
-
-
 class InsertPostRequest(BaseModel):
     book_title: str
     author: str
-    course: Course
+    course: str
     book_status: BookStatus
     price: int
     original_price: Optional[int] = None
@@ -58,7 +48,7 @@ class SearchRequest(BaseModel):
     status: List[Status] = [Status.ACTIVE]
     book_title: Optional[str] = None
     author: Optional[str] = None
-    course: Optional[Course] = None
+    course: Optional[str] = None
     book_status: Optional[BookStatus] = None
     location: Optional[str] = None
     min_price: Optional[int] = None
@@ -66,6 +56,7 @@ class SearchRequest(BaseModel):
     sort_by: SortBy = SortBy.NEWEST
     offset: int = 0
     limit: int = 10
+
 
 class PostDetailResponse(BaseModel):
     id: int
@@ -75,7 +66,7 @@ class PostDetailResponse(BaseModel):
     created_at: Optional[str] = None
     seller_name: Optional[str] = None
     author: Optional[str] = None
-    course: Optional[Course] = None
+    course: Optional[str] = None
     location: Optional[str] = None
     status: Optional[Status] = None
     book_status: Optional[BookStatus] = None
