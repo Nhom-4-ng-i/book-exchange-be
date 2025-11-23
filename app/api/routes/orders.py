@@ -1,0 +1,60 @@
+from fastapi import APIRouter, Depends
+from app.crud.orders import (
+    get_orders_list,
+    get_order,
+    insert_order,
+    update_order,
+    delete_order
+)
+from app.schemas.orders import InsertOrderRequest, UpdateOrderRequest
+from app.utils.get_token import get_current_user_id
+
+
+router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+@router.get("/")
+async def get_orders_list_route():
+    orders = get_orders_list()
+    orders = [
+        {
+            "id": order["id"],
+            "post_id": order["post_id"],
+            "buyer_id": order["buyer_id"],
+            "status": order["status"],
+        }
+        for order in orders
+    ]
+    return orders
+
+
+@router.get("/{order_id}")
+async def get_order_route(order_id: int):
+    order = get_order(order_id=order_id)
+    return {
+        "id": order["id"],
+        "post_id": order["post_id"],
+        "buyer_id": order["buyer_id"],
+        "status": order["status"],
+    }
+
+
+@router.post("/")
+async def insert_order_route(order_request: InsertOrderRequest, user_id: str = Depends(get_current_user_id)):
+    insert_order(
+        post_id=order_request.post_id,
+        buyer_id=user_id
+    )
+
+
+@router.put("/{order_id}")
+async def update_order_route(order_id: int, order_request: UpdateOrderRequest):
+    update_order(
+        order_id=order_id,
+        status=order_request.status
+    )
+
+
+@router.delete("/{order_id}")
+async def delete_order_route(order_id: int):
+    delete_order(order_id=order_id)
