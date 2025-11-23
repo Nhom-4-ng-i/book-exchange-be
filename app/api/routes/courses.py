@@ -15,13 +15,15 @@ router = APIRouter(prefix="/courses", tags=["courses"])
 @router.get("/")
 async def get_courses_list_route():
     courses = get_courses_list()
+    courses = [{"id": course["id"], "name": course["name"]}
+               for course in courses]
     return courses
 
 
 @router.get("/{course_id}")
 async def get_course_route(course_id: int):
     course = get_course(id=course_id)
-    return course
+    return {"id": course["id"], "name": course["name"]}
 
 
 @router.post("/")
