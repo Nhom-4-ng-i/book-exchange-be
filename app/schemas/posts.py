@@ -30,7 +30,7 @@ class BookStatus(Enum):
     DAMAGED = "Rách - có dấu hiệu cũ"
 
 
-class InsertPostRequest(BaseModel):
+class InsertUpdatePostRequest(BaseModel):
     book_title: str
     author: str
     course: str
@@ -42,34 +42,3 @@ class InsertPostRequest(BaseModel):
     location_detail: Optional[str] = None
     avatar_url: Optional[str] = None
     user_id: Optional[str] = None
-
-
-class SearchRequest(BaseModel):
-    status: List[Status] = [Status.ACTIVE]
-    book_title: Optional[str] = None
-    author: Optional[str] = None
-    course: Optional[str] = None
-    book_status: Optional[BookStatus] = None
-    location: Optional[str] = None
-    min_price: Optional[int] = None
-    max_price: Optional[int] = None
-    sort_by: SortBy = SortBy.NEWEST
-    offset: int = 0
-    limit: int = 10
-
-
-class PostDetailResponse(BaseModel):
-    id: int
-    title: str
-    description: Optional[str] = None
-    price: float
-    created_at: Optional[str] = None
-    seller_name: Optional[str] = None
-    author: Optional[str] = None
-    course: Optional[str] = None
-    location: Optional[str] = None
-    status: Optional[Status] = None
-    book_status: Optional[BookStatus] = None
-    original_price: Optional[float] = None
-    location_detail: Optional[str] = None
-    avatar: Optional[str] = None

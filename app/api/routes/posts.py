@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
-from app.schemas.posts import SearchRequest, InsertPostRequest, SortBy
+from fastapi import APIRouter, Query, Depends, HTTPException
+from app.schemas.posts import InsertUpdatePostRequest
 from app.crud.posts import (
     get_posts_list,
-    search_posts,
+    get_post,
     insert_post,
-    get_post_by_id,
-    get_post_detail
+    update_post,
 )
-from app.schemas.posts import PostDetailResponse
+from typing import List, Optional
 from app.utils.get_token import get_current_user_id
 
 
@@ -15,8 +14,29 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 
 @router.get("/")
-async def get_posts_list_route():
-    posts = get_posts_list()
+async def get_posts_list_route(
+    status: Optional[List[str]] = Query(default=None),
+    book_title: Optional[str] = None,
+    author: Optional[str] = None,
+    book_status: Optional[str] = None,
+    course_id: Optional[int] = None,
+    location_id: Optional[int] = None,
+    min_price: Optional[int] = None,
+    max_price: Optional[int] = None,
+    offset: Optional[int] = Query(default=0),
+    limit: Optional[int] = Query(default=10)
+):
+    posts = get_posts_list(
+        status=status,
+        book_title=book_title,
+        author=author,
+        book_status=book_status,
+        course_id=course_id,
+        location_id=location_id,
+        min_price=min_price,
+        max_price=max_price
+    )
+
     posts = [
         {
             "id": post["id"],
@@ -31,18 +51,21 @@ async def get_posts_list_route():
             "original_price": post["original_price"],
             "description": post["description"],
         }
-        for post in posts]
+        for post in posts[offset:offset + limit]]
+
     return posts
 
 
 @router.get("/{post_id}")
 async def get_post_route(post_id: int):
-    response = get_post_by_id(post_id=post_id)
-    return response
+    post = get_post(id=post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return {"id": post["id"], "book_title": post["book_title"], "author": post["author"], "course_id": post["course_id"], "book_status": post["book_status"], "price": post["price"], "location_id": post["location_id"], "location_detail": post["location_detail"], "original_price": post["original_price"], "description": post["description"]}
 
 
 @router.post("/")
-async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str = Depends(get_current_user_id)):
+async def insert_post_route(insert_post_request: InsertUpdatePostRequest, user_id: str = Depends(get_current_user_id)):
     try:
         insert_post(
             book_title=insert_post_request.book_title,
@@ -61,36 +84,8 @@ async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/search")
-async def search_posts_route(search_request: SearchRequest):
-    results = search_posts(
-        status=search_request.status,
-        book_title=search_request.book_title,
-        author=search_request.author,
-        course=search_request.course.value,
-        book_status=search_request.book_status.value,
-        location=search_request.location.value,
-        min_price=search_request.min_price,
-        max_price=search_request.max_price
-    )
-
-    if search_request.sort_by == SortBy.NEWEST:
-        results = sorted(results, key=lambda x: x["created_at"], reverse=True)
-    elif search_request.sort_by == SortBy.PRICE_ASC:
-        results = sorted(results, key=lambda x: x["price"])
-    elif search_request.sort_by == SortBy.PRICE_DESC:
-        results = sorted(results, key=lambda x: x["price"], reverse=True)
-
-    return results[search_request.offset:search_request.offset + search_request.limit]
-
-
-@router.get("/{post_id}", response_model=PostDetailResponse)
-def read_post_detail(post_id: int):
-    """Return detailed information about a single post by id.
-
-    Uses `get_post_detail` from the CRUD layer which queries Supabase.
-    """
-    post = get_post_detail(post_id)
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    return post
+@router.put("/{post_id}")
+async def update_post_route(post_id: int, update_post_request: InsertUpdatePostRequest):
+    update_post(id=post_id, book_title=update_post_request.book_title, author=update_post_request.author, course=update_post_request.course.value, book_status=update_post_request.book_status.value, price=update_post_request.price,
+                location=update_post_request.location.value, location_detail=update_post_request.location_detail, original_price=update_post_request.original_price, description=update_post_request.description)
+    return {"ok": True}
