@@ -1,11 +1,12 @@
 from typing import Optional, List, Any
 from app.services.supabase import get_supabase
-from app.schemas.posts import Status, Course, BookStatus, Location
+from app.schemas.posts import Status, BookStatus, Location
 from app.services.cloudinary_client import upload_image_to_cloudinary
 
 from app.schemas.posts import Status
 from typing import Optional
 from datetime import datetime
+
 
 def get_post_by_id(post_id: int):
     supabase = get_supabase()
@@ -46,7 +47,7 @@ def get_post_by_id(post_id: int):
     return post
 
 
-def insert_post(book_title: str, author: str, course: Course, book_status: BookStatus, price: int, location: Location, location_detail: Optional[str] = None, original_price: Optional[int] = None, description: Optional[str] = None, avatar: Optional[Any] = None, user_id: Optional[str] = None):
+def insert_post(book_title: str, author: str, course: str, book_status: BookStatus, price: int, location: Location, location_detail: Optional[str] = None, original_price: Optional[int] = None, description: Optional[str] = None, avatar: Optional[Any] = None, user_id: Optional[str] = None):
     supabase = get_supabase()
 
     avatar_url = None
@@ -78,7 +79,7 @@ def insert_post(book_title: str, author: str, course: Course, book_status: BookS
     supabase.table("posts").insert(payload).execute()
 
 
-def search_posts(status: List[Status], book_title: Optional[str] = None, author: Optional[str] = None, course: Optional[Course] = None, book_status: Optional[BookStatus] = None, location: Optional[Location] = None, min_price: Optional[int] = None, max_price: Optional[int] = None):
+def search_posts(status: List[Status], book_title: Optional[str] = None, author: Optional[str] = None, course: Optional[str] = None, book_status: Optional[BookStatus] = None, location: Optional[Location] = None, min_price: Optional[int] = None, max_price: Optional[int] = None):
     supabase = get_supabase()
 
     # Search with filters
@@ -115,11 +116,13 @@ def search_posts(status: List[Status], book_title: Optional[str] = None, author:
         ).data
         return response
 
+
 def get_post_detail(post_id: int) -> Optional[dict]:
 
     supabase = get_supabase()
     try:
-        resp = supabase.table('posts').select('*').eq('post_id', post_id).limit(1).execute()
+        resp = supabase.table('posts').select(
+            '*').eq('post_id', post_id).limit(1).execute()
     except Exception:
         return None
 
@@ -134,11 +137,13 @@ def get_post_detail(post_id: int) -> Optional[dict]:
     seller_name = ''
     if seller_id:
         try:
-            s = supabase.table('profiles').select('name').eq('user_id', seller_id).limit(1).execute()
+            s = supabase.table('profiles').select('name').eq(
+                'user_id', seller_id).limit(1).execute()
             sdata = getattr(s, 'data', None) or []
             if sdata:
                 seller = sdata[0]
-                seller_name = seller.get('full_name') or seller.get('name') or seller.get('username') or ''
+                seller_name = seller.get('full_name') or seller.get(
+                    'name') or seller.get('username') or ''
         except Exception:
             seller_name = ''
 
