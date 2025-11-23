@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.auth import SignUpRequest, SignInRequest, SignInResponse
-from app.crud.profiles import create_profile, get_profile_by_id
+from app.crud.profiles import insert_profile, get_profile
 from app.crud.auth import sign_up, sign_in
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -19,7 +19,7 @@ async def sign_up_route(auth_request: SignUpRequest):
 
     user_id = getattr(response.user, "id", None)
     if user_id:
-        create_profile(user_id=user_id, name=name, email=email)
+        insert_profile(user_id=user_id, name=name, email=email)
 
 
 @router.post("/sign-in", response_model=SignInResponse)
@@ -31,7 +31,7 @@ async def sign_in_route(auth_request: SignInRequest):
 
         access_token = getattr(response.session, "access_token", None)
         user_id = getattr(response.user, "id", None)
-        user_profile = get_profile_by_id(user_id=user_id)
+        user_profile = get_profile(user_id=user_id)
         name = user_profile.get("name")
         role = user_profile.get("role")
 

@@ -1,7 +1,19 @@
 from app.services.supabase import get_supabase
 
 
-def create_profile(user_id: str, name: str, email: str):
+def get_profile(user_id: str):
+    supabase = get_supabase()
+    return (
+        supabase
+        .table("profiles")
+        .select("*")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    ).data
+
+
+def insert_profile(user_id: str, name: str, email: str):
     supabase = get_supabase()
     (
         supabase
@@ -15,13 +27,26 @@ def create_profile(user_id: str, name: str, email: str):
     )
 
 
-def get_profile_by_id(user_id: str):
+def update_profile(user_id: str, name: str, email: str):
     supabase = get_supabase()
-    return (
+    (
         supabase
         .table("profiles")
-        .select("*")
+        .update({
+            "name": name,
+            "email": email
+        })
         .eq("user_id", user_id)
-        .single()
         .execute()
-    ).data
+    )
+
+
+def delete_profile(user_id: str):
+    supabase = get_supabase()
+    (
+        supabase
+        .table("profiles")
+        .delete()
+        .eq("user_id", user_id)
+        .execute()
+    )
