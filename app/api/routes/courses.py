@@ -7,5 +7,6 @@ router = APIRouter(prefix="/courses", tags=["courses"])
 
 @router.get("/")
 async def get_all_courses_route():
-    response = get_all_courses()
-    return response
+    courses = get_all_courses()
+    courses = [course["name"] for course in courses]
+    return courses
