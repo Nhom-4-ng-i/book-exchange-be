@@ -1,11 +1,38 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.posts import SearchRequest, InsertPostRequest, SortBy
-from app.crud.posts import search_posts, insert_post, get_post_by_id, get_post_detail
+from app.crud.posts import (
+    get_posts_list,
+    search_posts,
+    insert_post,
+    get_post_by_id,
+    get_post_detail
+)
 from app.schemas.posts import PostDetailResponse
 from app.utils.get_token import get_current_user_id
 
 
 router = APIRouter(prefix="/posts", tags=["posts"])
+
+
+@router.get("/")
+async def get_posts_list_route():
+    posts = get_posts_list()
+    posts = [
+        {
+            "id": post["id"],
+            "user_id": post["user_id"],
+            "book_title": post["book_title"],
+            "author": post["author"],
+            "course_id": post["course_id"],
+            "book_status": post["book_status"],
+            "price": post["price"],
+            "location_id": post["location_id"],
+            "location_detail": post["location_detail"],
+            "original_price": post["original_price"],
+            "description": post["description"],
+        }
+        for post in posts]
+    return posts
 
 
 @router.get("/{post_id}")

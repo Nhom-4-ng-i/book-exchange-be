@@ -5,7 +5,13 @@ from app.services.cloudinary_client import upload_image_to_cloudinary
 
 from app.schemas.posts import Status
 from typing import Optional
-from datetime import datetime
+
+
+def get_posts_list():
+    supabase = get_supabase()
+    res = supabase.table("posts").select(
+        "*").execute()
+    return res.data
 
 
 def get_post_by_id(post_id: int):
