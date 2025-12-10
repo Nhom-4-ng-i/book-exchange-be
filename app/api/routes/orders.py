@@ -46,7 +46,8 @@ async def get_order_route(order_id: int):
 async def insert_order_route(order_request: InsertOrderRequest, user_id: str = Depends(get_current_user_id)):
     insert_order(
         post_id=order_request.post_id,
-        buyer_id=user_id
+        buyer_id=user_id,
+        buyer_note=order_request.buyer_note
     )
 
 
