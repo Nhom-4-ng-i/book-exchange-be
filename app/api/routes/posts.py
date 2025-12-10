@@ -5,8 +5,11 @@ from app.crud.posts import (
     get_posts_list,
     get_post,
     insert_post,
-    update_post,
-    delete_post
+    update_post
+)
+from app.crud.orders import (
+    get_orders_list,
+    update_order
 )
 from typing import List, Optional
 
@@ -27,6 +30,7 @@ async def get_posts_list_route(
     sort_by: Optional[str] = Query(default=None),
     offset: Optional[int] = Query(default=None),
     limit: Optional[int] = Query(default=None),
+    _: str = Depends(get_current_user_id),
 ):
     posts = get_posts_list(
         status=status,
@@ -57,16 +61,17 @@ async def get_posts_list_route(
         {
             "id": post["id"],
             "status": post["status"],
-            "user_id": post["user_id"],
-            "book_title": post["book_title"],
+            "seller_name": post["seller_name"],
+            "title": post["book_title"],
             "author": post["author"],
-            "course_id": post["course_id"],
-            "book_status": post["book_status"],
             "price": post["price"],
-            "location_id": post["location_id"],
-            "location_detail": post["location_detail"],
+            "course": post["course"],
+            "location": post["location"],
+            "book_status": post["book_status"],
             "original_price": post["original_price"],
             "description": post["description"],
+            "location_detail": post["location_detail"],
+            "avatar_url": post["avatar_url"],
         }
         for post in posts]
 
@@ -74,28 +79,15 @@ async def get_posts_list_route(
 
 
 @router.get("/{post_id}")
-async def get_post_route(post_id: int):
+async def get_post_route(post_id: int, _: str = Depends(get_current_user_id)):
     post = get_post(id=post_id)
-    return {
-        "id": post["id"],
-        "status": post["status"],
-        "user_id": post["user_id"],
-        "book_title": post["book_title"],
-        "author": post["author"],
-        "course_id": post["course_id"],
-        "book_status": post["book_status"],
-        "price": post["price"],
-        "location_id": post["location_id"],
-        "location_detail": post["location_detail"],
-        "original_price": post["original_price"],
-        "description": post["description"]
-    }
+    return post
 
 
 @router.post("/")
 async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str = Depends(get_current_user_id)):
     insert_post(
-        user_id=user_id,
+        seller_id=user_id,
         status_id=1,
         book_title=insert_post_request.book_title,
         author=insert_post_request.author,
@@ -109,23 +101,25 @@ async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str
     )
 
 
-# @router.put("/{post_id}")
-# async def update_post_route(post_id: int, update_post_request: UpdatePostRequest, _: str = Depends(get_current_user_id)):
-#     update_post(
-#         post_id=post_id,
-#         status_id=update_post_request.status_id,
-#         book_title=update_post_request.book_title,
-#         author=update_post_request.author,
-#         course_id=update_post_request.course_id,
-#         book_status_id=update_post_request.book_status_id,
-#         price=update_post_request.price,
-#         location_id=update_post_request.location_id,
-#         location_detail=update_post_request.location_detail,
-#         original_price=update_post_request.original_price,
-#         description=update_post_request.description
-#     )
+@router.post("/{post_id}/cancel")
+async def cancel_post_route(post_id: int, _: str = Depends(get_current_user_id)):
+    orders = get_orders_list(post_id=post_id, status="PENDING")
+    for order in orders:
+        update_order(order_id=order["id"], status_id=3)
+    update_post(post_id=post_id, status_id=4)
 
 
-# @router.delete("/{post_id}")
-# async def delete_post_route(post_id: int, _: str = Depends(get_current_user_id)):
-#     delete_post(id=post_id)
+@router.put("/{post_id}")
+async def update_post_route(post_id: int, update_post_request: UpdatePostRequest, _: str = Depends(get_current_user_id)):
+    update_post(
+        post_id=post_id,
+        book_title=update_post_request.book_title,
+        author=update_post_request.author,
+        course_id=update_post_request.course_id,
+        book_status_id=update_post_request.book_status_id,
+        price=update_post_request.price,
+        location_id=update_post_request.location_id,
+        location_detail=update_post_request.location_detail,
+        original_price=update_post_request.original_price,
+        description=update_post_request.description
+    )

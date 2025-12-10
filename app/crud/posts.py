@@ -3,20 +3,8 @@ from app.services.supabase import get_supabase
 from app.services.cloudinary_client import upload_image_to_cloudinary
 
 
-def get_posts_list(
-    status: Optional[List[str]] = None,
-    book_title: Optional[str] = None,
-    author: Optional[str] = None,
-    book_status: Optional[str] = None,
-    course_id: Optional[int] = None,
-    location_id: Optional[int] = None,
-    min_price: Optional[int] = None,
-    max_price: Optional[int] = None,
-    seller_id: Optional[str] = None,
-):
-    supabase = get_supabase()
-
-    query = (
+def _base_posts_query(supabase):
+    return (
         supabase
         .table("posts")
         .select(
@@ -30,6 +18,41 @@ def get_posts_list(
             """
         )
     )
+
+
+def _map_post_row(row: dict) -> dict:
+    return {
+        "id": row["id"],
+        "status": (row.get("post_status") or {}).get("name"),
+        "book_title": row["book_title"],
+        "author": row["author"],
+        "course": (row.get("courses") or {}).get("name"),
+        "location": (row.get("locations") or {}).get("name"),
+        "book_status": (row.get("book_status") or {}).get("name"),
+        "price": row["price"],
+        "created_at": row["created_at"],
+        "avatar_url": row["avatar_url"],
+        "original_price": row["original_price"],
+        "description": row["description"],
+        "location_detail": row["location_detail"],
+        "seller_name": (row.get("profiles") or {}).get("name"),
+    }
+
+
+def get_posts_list(
+    status: Optional[List[str]] = None,
+    book_title: Optional[str] = None,
+    author: Optional[str] = None,
+    book_status: Optional[str] = None,
+    course_id: Optional[int] = None,
+    location_id: Optional[int] = None,
+    min_price: Optional[int] = None,
+    max_price: Optional[int] = None,
+    seller_id: Optional[str] = None,
+):
+    supabase = get_supabase()
+
+    query = _base_posts_query(supabase)
 
     if status is not None:
         query = query.in_("post_status.code", status)
@@ -61,40 +84,29 @@ def get_posts_list(
     response = query.execute()
     raw_posts = response.data or []
 
-    posts = []
-    for row in raw_posts:
-        posts.append({
-            "id": row["id"],
-            "book_title": row["book_title"],
-            "author": row["author"],
-            "price": row["price"],
-            "created_at": row["created_at"],
-            "avatar_url": row["avatar_url"],
-            "course": row.get("courses", {}).get("name"),
-            "location": row.get("locations", {}).get("name"),
-            "book_status": row.get("book_status", {}).get("name"),
-            "status": row.get("post_status", {}).get("name"),
-            "seller_name": row.get("profiles", {}).get("name"),
-        })
-
+    posts = [_map_post_row(row) for row in raw_posts]
     return posts
 
 
 def get_post(id: int):
     supabase = get_supabase()
+
     query = (
-        supabase
-        .table("posts")
-        .select("*")
+        _base_posts_query(supabase)
         .eq("id", id)
         .single()
     )
     response = query.execute()
-    return response.data
+    row = response.data
+
+    if row is None:
+        return None
+
+    return _map_post_row(row)
 
 
 def insert_post(
-    user_id: str,
+    seller_id: str,
     status_id: int,
     book_title: str,
     author: str,
@@ -112,7 +124,7 @@ def insert_post(
         "book_title": book_title,
         "status_id": status_id,
         "author": author,
-        "user_id": user_id,
+        "seller_id": seller_id,
         "course_id": course_id,
         "book_status_id": book_status_id,
         "price": price,
@@ -168,8 +180,3 @@ def update_post(
         post["description"] = description
 
     supabase.table("posts").update(post).eq("id", post_id).execute()
-
-
-def delete_post(id: int):
-    supabase = get_supabase()
-    supabase.table("posts").delete().eq("id", id).execute()
