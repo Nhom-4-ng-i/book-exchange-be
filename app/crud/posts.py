@@ -95,11 +95,11 @@ def get_post(id: int):
 
 def insert_post(
     user_id: str,
-    status: str,
+    status_id: int,
     book_title: str,
     author: str,
     course_id: int,
-    book_status: str,
+    book_status_id: int,
     price: int,
     location_id: int,
     location_detail: Optional[str],
@@ -110,11 +110,11 @@ def insert_post(
 
     post = {
         "book_title": book_title,
-        "status": status,
+        "status_id": status_id,
         "author": author,
         "user_id": user_id,
         "course_id": course_id,
-        "book_status": book_status,
+        "book_status_id": book_status_id,
         "price": price,
         "location_id": location_id,
     }
@@ -130,14 +130,14 @@ def insert_post(
 
 
 def update_post(
-    id: int,
-    status: str,
-    book_title: str,
-    author: str,
-    course_id: int,
-    book_status: str,
-    price: int,
-    location_id: int,
+    post_id: int,
+    status_id: Optional[int] = None,
+    book_title: Optional[str] = None,
+    author: Optional[str] = None,
+    course_id: Optional[int] = None,
+    book_status_id: Optional[int] = None,
+    price: Optional[int] = None,
+    location_id: Optional[int] = None,
     location_detail: Optional[str] = None,
     original_price: Optional[int] = None,
     description: Optional[str] = None,
@@ -146,16 +146,16 @@ def update_post(
 
     post = {}
 
-    if status is not None:
-        post["status"] = status
+    if status_id is not None:
+        post["status_id"] = status_id
     if book_title is not None:
         post["book_title"] = book_title
     if author is not None:
         post["author"] = author
     if course_id is not None:
         post["course_id"] = course_id
-    if book_status is not None:
-        post["book_status"] = book_status
+    if book_status_id is not None:
+        post["book_status_id"] = book_status_id
     if price is not None:
         post["price"] = price
     if location_id is not None:
@@ -167,7 +167,7 @@ def update_post(
     if description is not None:
         post["description"] = description
 
-    supabase.table("posts").update(post).eq("id", id).execute()
+    supabase.table("posts").update(post).eq("id", post_id).execute()
 
 
 def delete_post(id: int):

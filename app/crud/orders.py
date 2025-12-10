@@ -78,7 +78,7 @@ def get_order(order_id: int):
     return res.data
 
 
-def insert_order(post_id: int, buyer_id: str):
+def insert_order(post_id: int, buyer_id: str, buyer_note: Optional[str] = None):
     supabase = get_supabase()
     (
         supabase
@@ -86,23 +86,24 @@ def insert_order(post_id: int, buyer_id: str):
         .insert({
             "post_id": post_id,
             "buyer_id": buyer_id,
-            "status": "pending"
+            "buyer_note": buyer_note
         })
         .execute()
     )
 
 
-def update_order(order_id: int, status: str):
+def update_order(order_id: int, status_id: int):
     supabase = get_supabase()
-    (
+    response = (
         supabase
         .table("orders")
         .update({
-            "status": status
+            "status_id": status_id
         })
         .eq("id", order_id)
         .execute()
     )
+    return response.data[0]
 
 
 def delete_order(order_id: int):
