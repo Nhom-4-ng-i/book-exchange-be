@@ -13,6 +13,7 @@ async def get_profile_route(user_id: str):
         "user_id": response["user_id"],
         "name": response["name"],
         "email": response["email"],
+        "avatar_url": response["avatar_url"],
     }
 
 

@@ -12,7 +12,6 @@ def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(secu
     Returns the user_id string or raises 401.
     """
     token = credentials.credentials
-    print("token", token)
     supabase = get_supabase()
 
     # Try to get user info from Supabase using the access token

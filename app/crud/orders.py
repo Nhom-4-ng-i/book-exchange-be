@@ -1,15 +1,23 @@
 from app.services.supabase import get_supabase
+from typing import Optional
 
 
-def get_orders_list():
+def get_orders_list(buyer_id: Optional[str] = None, seller_id: Optional[str] = None):
     supabase = get_supabase()
-    res = (
+
+    query = (
         supabase
         .table("orders")
-        .select("*")
-        .execute()
+        .select("*, posts!inner(seller_id:user_id)")
     )
-    return res.data
+
+    if buyer_id:
+        query = query.eq("buyer_id", buyer_id)
+    if seller_id:
+        query = query.eq("posts.user_id", seller_id)
+
+    response = query.execute()
+    return response.data
 
 
 def get_order(order_id: int):

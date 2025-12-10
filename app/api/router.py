@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import posts, auth, profiles, courses, locations, orders
+from app.api.routes import posts, auth, profiles, courses, locations, orders, user
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(posts.router)
@@ -8,3 +8,4 @@ api_router.include_router(profiles.router)
 api_router.include_router(courses.router)
 api_router.include_router(locations.router)
 api_router.include_router(orders.router)
+api_router.include_router(user.router)
