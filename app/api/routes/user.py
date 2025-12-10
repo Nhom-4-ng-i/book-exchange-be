@@ -33,5 +33,5 @@ def get_my_posts_route(user_id: str = Depends(get_current_user_id)):
 @router.get("/orders")
 def get_my_orders_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.orders import get_orders_list
-    orders = get_orders_list(seller_id=user_id)
+    orders = get_orders_list(buyer_id=user_id)
     return orders

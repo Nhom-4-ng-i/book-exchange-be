@@ -2,22 +2,67 @@ from app.services.supabase import get_supabase
 from typing import Optional
 
 
-def get_orders_list(buyer_id: Optional[str] = None, seller_id: Optional[str] = None):
+def get_orders_list(
+    buyer_id: Optional[str] = None,
+    seller_id: Optional[str] = None,
+    status: Optional[str] = None
+):
     supabase = get_supabase()
 
     query = (
         supabase
         .table("orders")
-        .select("*, posts!inner(seller_id:user_id)")
+        .select(
+            """
+            created_at,
+            order_status(code, name),
+            posts!inner(
+                book_title,
+                author,
+                price,
+                avatar_url,
+                seller_id,
+                courses(name),
+                locations(name),
+                book_status(name),
+                post_status(name),
+                profiles(name)
+            )
+            """
+        )
     )
 
     if buyer_id:
         query = query.eq("buyer_id", buyer_id)
+
     if seller_id:
-        query = query.eq("posts.user_id", seller_id)
+        query = query.eq("posts.seller_id", seller_id)
+
+    if status:
+        query = query.eq("order_status.code", status)
 
     response = query.execute()
-    return response.data
+    raw_orders = response.data or []
+
+    orders = []
+    for row in raw_orders:
+        post = row["posts"]
+
+        orders.append({
+            "created_at": row.get("created_at"),
+            "order_status": row["order_status"]["name"],
+            "title": post["book_title"],
+            "author": post["author"],
+            "price": post["price"],
+            "avatar_url": post.get("avatar_url"),
+            "course": post.get("courses", {}).get("name"),
+            "location": post.get("locations", {}).get("name"),
+            "book_status": post.get("book_status", {}).get("name"),
+            "post_status": post.get("post_status", {}).get("name"),
+            "seller_name": post.get("profiles", {}).get("name"),
+        })
+
+    return orders
 
 
 def get_order(order_id: int):

@@ -56,14 +56,14 @@ def get_posts_list(
         query = query.lte("price", max_price)
 
     if seller_id is not None:
-        query = query.eq("user_id", seller_id)
+        query = query.eq("seller_id", seller_id)
 
     response = query.execute()
     raw_posts = response.data or []
 
-    normalized_posts = []
+    posts = []
     for row in raw_posts:
-        normalized_posts.append({
+        posts.append({
             "id": row["id"],
             "book_title": row["book_title"],
             "author": row["author"],
@@ -77,7 +77,7 @@ def get_posts_list(
             "seller_name": row.get("profiles", {}).get("name"),
         })
 
-    return normalized_posts
+    return posts
 
 
 def get_post(id: int):
