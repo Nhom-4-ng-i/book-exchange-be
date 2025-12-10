@@ -1,7 +1,6 @@
-from typing import Optional, List, Any
+from typing import Optional, List
 from app.services.supabase import get_supabase
 from app.services.cloudinary_client import upload_image_to_cloudinary
-from typing import Optional
 
 
 def get_posts_list(
@@ -12,46 +11,86 @@ def get_posts_list(
     course_id: Optional[int] = None,
     location_id: Optional[int] = None,
     min_price: Optional[int] = None,
-    max_price: Optional[int] = None
+    max_price: Optional[int] = None,
+    seller_id: Optional[str] = None,
 ):
     supabase = get_supabase()
-    res = (
+
+    query = (
         supabase
         .table("posts")
-        .select("*")
+        .select(
+            """
+            *,
+            courses(name),
+            locations(name),
+            book_status(code, name),
+            post_status(code, name),
+            profiles(name)
+            """
+        )
     )
-    if status is not None:
-        res = res.in_("status", status)
-    if book_title is not None:
-        res = res.text_search("book_title", f"'{book_title}'")
-    if author is not None:
-        res = res.eq("author", author)
-    if book_status is not None:
-        res = res.eq("book_status", book_status)
-    if course_id is not None:
-        res = res.eq("course_id", course_id)
-    if location_id is not None:
-        res = res.eq("location_id", location_id)
-    if min_price is not None:
-        res = res.gte("price", min_price)
-    if max_price is not None:
-        res = res.lte("price", max_price)
 
-    res = res.execute()
-    return res.data
+    if status is not None:
+        query = query.in_("post_status.code", status)
+
+    if book_title is not None:
+        query = query.text_search("book_title", f"'{book_title}'")
+
+    if author is not None:
+        query = query.eq("author", author)
+
+    if book_status is not None:
+        query = query.eq("book_status.code", book_status)
+
+    if course_id is not None:
+        query = query.eq("course_id", course_id)
+
+    if location_id is not None:
+        query = query.eq("location_id", location_id)
+
+    if min_price is not None:
+        query = query.gte("price", min_price)
+
+    if max_price is not None:
+        query = query.lte("price", max_price)
+
+    if seller_id is not None:
+        query = query.eq("seller_id", seller_id)
+
+    response = query.execute()
+    raw_posts = response.data or []
+
+    posts = []
+    for row in raw_posts:
+        posts.append({
+            "id": row["id"],
+            "book_title": row["book_title"],
+            "author": row["author"],
+            "price": row["price"],
+            "created_at": row["created_at"],
+            "avatar_url": row["avatar_url"],
+            "course": row.get("courses", {}).get("name"),
+            "location": row.get("locations", {}).get("name"),
+            "book_status": row.get("book_status", {}).get("name"),
+            "status": row.get("post_status", {}).get("name"),
+            "seller_name": row.get("profiles", {}).get("name"),
+        })
+
+    return posts
 
 
 def get_post(id: int):
     supabase = get_supabase()
-    res = (
+    query = (
         supabase
         .table("posts")
         .select("*")
         .eq("id", id)
         .single()
-        .execute()
     )
-    return res.data
+    response = query.execute()
+    return response.data
 
 
 def insert_post(

@@ -1,24 +1,17 @@
-from fastapi import Header, HTTPException
-from typing import Optional
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.services.supabase import get_supabase
 
+security = HTTPBearer()
 
-def get_current_user_id(authorization: Optional[str] = Header(None)) -> str:
+
+def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
     """Dependency to extract user_id from Bearer token using Supabase auth.
 
     Expects header: Authorization: Bearer <access_token>
     Returns the user_id string or raises 401.
     """
-    if not authorization:
-        raise HTTPException(
-            status_code=401, detail="Missing Authorization header")
-
-    parts = authorization.split()
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(
-            status_code=401, detail="Invalid authorization header format")
-
-    token = parts[1]
+    token = credentials.credentials
     supabase = get_supabase()
 
     # Try to get user info from Supabase using the access token
