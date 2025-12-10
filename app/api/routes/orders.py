@@ -50,13 +50,13 @@ async def insert_order_route(order_request: InsertOrderRequest, user_id: str = D
     )
 
 
-@router.put("/{order_id}/accept")
+@router.post("/{order_id}/accept")
 async def accept_order_route(order_id: int, _: str = Depends(get_current_user_id)):
     response = update_order(order_id=order_id, status_id=2)
     update_post(post_id=response["post_id"], status_id=2)
 
 
-@router.put("/{order_id}/reject")
+@router.post("/{order_id}/reject")
 async def reject_order_route(order_id: int, _: str = Depends(get_current_user_id)):
     update_order(order_id=order_id, status_id=3)
 
