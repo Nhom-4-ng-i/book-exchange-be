@@ -19,3 +19,8 @@ def sign_in(email: str, password: str = "password"):
             "password": password
         }
     )
+
+
+def sign_out():
+    supabase = get_supabase()
+    supabase.auth.sign_out()

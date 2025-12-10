@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.auth import SignUpRequest, SignInRequest, SignInResponse
 from app.crud.profiles import insert_profile, get_profile
-from app.crud.auth import sign_up, sign_in
+from app.crud.auth import sign_up, sign_in, sign_out
+from app.utils.get_token import get_current_user_id
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -46,3 +47,8 @@ async def sign_in_route(auth_request: SignInRequest):
     except:
         raise HTTPException(
             status_code=401, detail="Invalid email or password")
+
+
+@router.post("/sign-out")
+async def sign_out_route(_: str = Depends(get_current_user_id)):
+    sign_out()
