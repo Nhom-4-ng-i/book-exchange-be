@@ -5,7 +5,3 @@ from typing import Optional
 class InsertOrderRequest(BaseModel):
     post_id: int
     buyer_note: Optional[str] = None
-
-
-class UpdateOrderRequest(BaseModel):
-    status: str

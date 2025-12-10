@@ -5,7 +5,8 @@ from typing import Optional
 def get_orders_list(
     buyer_id: Optional[str] = None,
     seller_id: Optional[str] = None,
-    status: Optional[str] = None
+    status: Optional[str] = None,
+    post_id: Optional[int] = None,
 ):
     supabase = get_supabase()
 
@@ -41,6 +42,9 @@ def get_orders_list(
     if status:
         query = query.eq("order_status.code", status)
 
+    if post_id:
+        query = query.eq("posts.id", post_id)
+
     response = query.execute()
     raw_orders = response.data or []
 
@@ -63,19 +67,6 @@ def get_orders_list(
         })
 
     return orders
-
-
-def get_order(order_id: int):
-    supabase = get_supabase()
-    res = (
-        supabase
-        .table("orders")
-        .select("*")
-        .eq("id", order_id)
-        .single()
-        .execute()
-    )
-    return res.data
 
 
 def insert_order(post_id: int, buyer_id: str, buyer_note: Optional[str] = None):
@@ -104,14 +95,3 @@ def update_order(order_id: int, status_id: int):
         .execute()
     )
     return response.data[0]
-
-
-def delete_order(order_id: int):
-    supabase = get_supabase()
-    (
-        supabase
-        .table("orders")
-        .delete()
-        .eq("id", order_id)
-        .execute()
-    )

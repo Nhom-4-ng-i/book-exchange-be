@@ -27,26 +27,11 @@ def insert_profile(user_id: str, name: str, email: str):
     )
 
 
-def update_profile(user_id: str, name: str, email: str):
+def update_profile(user_id: str, name: str = None, email: str = None):
     supabase = get_supabase()
-    (
-        supabase
-        .table("profiles")
-        .update({
-            "name": name,
-            "email": email
-        })
-        .eq("user_id", user_id)
-        .execute()
-    )
-
-
-def delete_profile(user_id: str):
-    supabase = get_supabase()
-    (
-        supabase
-        .table("profiles")
-        .delete()
-        .eq("user_id", user_id)
-        .execute()
-    )
+    profile = {}
+    if name is not None:
+        profile["name"] = name
+    if email is not None:
+        profile["email"] = email
+    supabase.table("profiles").update(profile).eq("user_id", user_id).execute()
