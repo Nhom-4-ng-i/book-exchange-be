@@ -109,11 +109,6 @@ async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str
     )
 
 
-@router.post("/{post_id}/complete")
-async def complete_post_route(post_id: int, _: str = Depends(get_current_user_id)):
-    update_post(post_id=post_id, status_id=3)
-
-
 # @router.put("/{post_id}")
 # async def update_post_route(post_id: int, update_post_request: UpdatePostRequest, _: str = Depends(get_current_user_id)):
 #     update_post(

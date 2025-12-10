@@ -62,14 +62,20 @@ async def reject_order_route(order_id: int, _: str = Depends(get_current_user_id
     update_order(order_id=order_id, status_id=3)
 
 
-@router.put("/{order_id}")
-async def update_order_route(order_id: int, order_request: UpdateOrderRequest):
-    update_order(
-        order_id=order_id,
-        status_id=order_request.status_id
-    )
+@router.post("/{order_id}/complete")
+async def complete_order_route(order_id: int, _: str = Depends(get_current_user_id)):
+    response = update_order(order_id=order_id, status_id=4)
+    update_post(post_id=response["post_id"], status_id=3)
 
 
-@router.delete("/{order_id}")
-async def delete_order_route(order_id: int):
-    delete_order(order_id=order_id)
+# @router.put("/{order_id}")
+# async def update_order_route(order_id: int, order_request: UpdateOrderRequest):
+#     update_order(
+#         order_id=order_id,
+#         status_id=order_request.status_id
+#     )
+
+
+# @router.delete("/{order_id}")
+# async def delete_order_route(order_id: int):
+#     delete_order(order_id=order_id)
