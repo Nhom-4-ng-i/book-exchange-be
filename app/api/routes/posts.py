@@ -96,11 +96,11 @@ async def get_post_route(post_id: int):
 async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str = Depends(get_current_user_id)):
     insert_post(
         user_id=user_id,
-        status="active",
+        status_id=1,
         book_title=insert_post_request.book_title,
         author=insert_post_request.author,
         course_id=insert_post_request.course_id,
-        book_status=insert_post_request.book_status,
+        book_status_id=insert_post_request.book_status_id,
         price=insert_post_request.price,
         location_id=insert_post_request.location_id,
         location_detail=insert_post_request.location_detail,
@@ -109,23 +109,28 @@ async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str
     )
 
 
-@router.put("/{post_id}")
-async def update_post_route(post_id: int, update_post_request: UpdatePostRequest, _: str = Depends(get_current_user_id)):
-    update_post(
-        id=post_id,
-        status=update_post_request.status,
-        book_title=update_post_request.book_title,
-        author=update_post_request.author,
-        course_id=update_post_request.course_id,
-        book_status=update_post_request.book_status,
-        price=update_post_request.price,
-        location_id=update_post_request.location_id,
-        location_detail=update_post_request.location_detail,
-        original_price=update_post_request.original_price,
-        description=update_post_request.description
-    )
+@router.put("/{post_id}/complete")
+async def complete_post_route(post_id: int, _: str = Depends(get_current_user_id)):
+    update_post(post_id=post_id, status_id=3)
 
 
-@router.delete("/{post_id}")
-async def delete_post_route(post_id: int, _: str = Depends(get_current_user_id)):
-    delete_post(id=post_id)
+# @router.put("/{post_id}")
+# async def update_post_route(post_id: int, update_post_request: UpdatePostRequest, _: str = Depends(get_current_user_id)):
+#     update_post(
+#         post_id=post_id,
+#         status_id=update_post_request.status_id,
+#         book_title=update_post_request.book_title,
+#         author=update_post_request.author,
+#         course_id=update_post_request.course_id,
+#         book_status_id=update_post_request.book_status_id,
+#         price=update_post_request.price,
+#         location_id=update_post_request.location_id,
+#         location_detail=update_post_request.location_detail,
+#         original_price=update_post_request.original_price,
+#         description=update_post_request.description
+#     )
+
+
+# @router.delete("/{post_id}")
+# async def delete_post_route(post_id: int, _: str = Depends(get_current_user_id)):
+#     delete_post(id=post_id)
