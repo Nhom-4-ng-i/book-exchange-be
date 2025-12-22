@@ -24,3 +24,19 @@ def sign_in(email: str, password: str = "password"):
 def sign_out():
     supabase = get_supabase()
     supabase.auth.sign_out()
+
+
+def update_phone(phone: str):
+    supabase = get_supabase()
+    supabase.auth.update_user({
+        "phone": phone
+    })
+
+
+def verify_phone_top(phone: str, token: str, type: str):
+    supabase = get_supabase()
+    supabase.auth.verify_otp({
+        "phone": phone,
+        "token": token,
+        "type": type
+    })
