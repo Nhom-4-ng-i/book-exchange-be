@@ -53,8 +53,9 @@ def get_orders_list(
         post = row["posts"]
 
         orders.append({
+            "order_id": row.get("id"),
             "created_at": row.get("created_at"),
-            "order_status": row["order_status"]["name"],
+            "order_status": row.get("order_status", {}).get("name"),
             "title": post["book_title"],
             "author": post["author"],
             "price": post["price"],

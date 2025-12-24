@@ -33,7 +33,7 @@ def update_phone(phone: str):
     })
 
 
-def verify_phone_top(phone: str, token: str, type: str):
+def verify_phone_otp(phone: str, token: str, type: str):
     supabase = get_supabase()
     supabase.auth.verify_otp({
         "phone": phone,

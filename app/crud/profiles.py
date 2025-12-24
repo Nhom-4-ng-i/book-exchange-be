@@ -27,11 +27,13 @@ def insert_profile(user_id: str, name: str, email: str):
     )
 
 
-def update_profile(user_id: str, name: str = None, email: str = None):
+def update_profile(user_id: str, name: str = None, email: str = None, phone: str = None):
     supabase = get_supabase()
     profile = {}
     if name is not None:
         profile["name"] = name
     if email is not None:
         profile["email"] = email
+    if phone is not None:
+        profile["phone"] = phone
     supabase.table("profiles").update(profile).eq("user_id", user_id).execute()
