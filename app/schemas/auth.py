@@ -1,5 +1,3 @@
-from nt import strerror
-from re import S
 from pydantic import BaseModel, EmailStr
 
 
