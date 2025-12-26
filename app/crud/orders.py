@@ -10,7 +10,6 @@ def get_orders_list(
 ):
     supabase = get_supabase()
 
-    # Cập nhật query: Lấy thêm status_id và thông tin ng mua
     query = (
         supabase
         .table("orders")
@@ -31,7 +30,7 @@ def get_orders_list(
                 locations(name),
                 book_status(name),
                 post_status(name),
-                profiles(name)
+                seller:profiles(name) 
             )
             """
         )
@@ -57,6 +56,8 @@ def get_orders_list(
     for row in raw_orders:
         post = row["posts"]
         buyer = row.get("buyer") or {}
+        
+        seller_info = post.get("seller") or {} 
 
         orders.append({
             "order_id": row.get("id"),
@@ -64,11 +65,9 @@ def get_orders_list(
             "status_id": row.get("status_id"),
             "order_status": row.get("order_status", {}).get("name"),
             
-            # Thông tin người mua
             "buyer_name": buyer.get("name"),
             "buyer_phone": buyer.get("phone"),
 
-            # Thông tin bài đăng
             "title": post["book_title"],
             "author": post["author"],
             "price": post["price"],
@@ -77,7 +76,7 @@ def get_orders_list(
             "location": post.get("locations", {}).get("name"),
             "book_status": post.get("book_status", {}).get("name"),
             "post_status": post.get("post_status", {}).get("name"),
-            "seller_name": post.get("profiles", {}).get("name"),
+            "seller_name": seller_info.get("name"),
         })
 
     return orders
