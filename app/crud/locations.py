@@ -6,7 +6,7 @@ def get_locations_list():
     response = (
         supabase
         .table("locations")
-        .select("name")
+        .select("name", "id")
         .execute()
     )
     return response.data

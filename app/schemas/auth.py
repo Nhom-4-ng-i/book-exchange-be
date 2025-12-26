@@ -24,8 +24,9 @@ class SignInResponse(BaseModel):
 class UpdatePhoneRequest(BaseModel):
     phone: str
 
+class SendPhoneOtpRequest(BaseModel):
+    phone: str
 
 class VerifyPhoneOtpRequest(BaseModel):
     phone: str
     token: str
-    type: str
