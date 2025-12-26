@@ -10,13 +10,21 @@ def get_orders_list(
 ):
     supabase = get_supabase()
 
+    # Cập nhật query: Lấy thêm status_id và thông tin ng mua
+    # Cập nhật query: Lấy thêm status_id và thông tin ng mua
     query = (
         supabase
         .table("orders")
         .select(
             """
+            id,
+            id,
             created_at,
+            status_id,
+            status_id,
             order_status(code, name),
+            buyer:profiles!buyer_id(name, phone), 
+            buyer:profiles!buyer_id(name, phone), 
             posts!inner(
                 book_title,
                 author,
@@ -31,6 +39,8 @@ def get_orders_list(
             )
             """
         )
+        .order("created_at", desc=True)
+        .order("created_at", desc=True)
     )
 
     if buyer_id:
@@ -51,11 +61,20 @@ def get_orders_list(
     orders = []
     for row in raw_orders:
         post = row["posts"]
+        buyer = row.get("buyer") or {}
+        buyer = row.get("buyer") or {}
 
         orders.append({
             "order_id": row.get("id"),
             "created_at": row.get("created_at"),
+            "status_id": row.get("status_id"),
             "order_status": row.get("order_status", {}).get("name") if row.get("order_status") else None,
+            
+            # Thông tin người mua
+            "buyer_name": buyer.get("name"),
+            "buyer_phone": buyer.get("phone"),
+
+            # Thông tin bài đăng
             "title": post["book_title"],
             "author": post["author"],
             "price": post["price"],

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.crud.orders import insert_order, update_order
+from app.crud.orders import insert_order, update_order, get_orders_list
 from app.crud.posts import update_post
 from app.schemas.orders import InsertOrderRequest
 from app.utils.get_token import get_current_user_id
@@ -37,3 +37,26 @@ async def complete_order_route(order_id: int, _: str = Depends(get_current_user_
 @router.post("/{order_id}/cancel")
 async def cancel_order_route(order_id: int, _: str = Depends(get_current_user_id)):
     update_order(order_id=order_id, status_id=5)
+
+
+@router.get("/seller")
+async def get_seller_orders_api(user_id: str = Depends(get_current_user_id)):
+    # List
+    raw_orders = get_orders_list(seller_id=user_id)
+    
+    result = {
+        "pending": [],
+        "accepted": [],
+        "completed": []
+    }
+    
+    for order in raw_orders:
+        status_id = order.get("status_id")
+        
+        if status_id == 1:
+            result["pending"].append(order)
+        elif status_id == 2:
+            result["accepted"].append(order)
+        elif status_id == 4:
+            result["completed"].append(order)
+    return result

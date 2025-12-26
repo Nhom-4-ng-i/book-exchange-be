@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
+from typing import List
 from app.utils.get_token import get_current_user_id
-from app.crud.wishlists import insert_wishlist, update_wishlist, delete_wishlist
-from app.schemas.wishlists import InsertWishlistRequest, UpdateWishlistRequest
+from app.crud.wishlists import insert_wishlist, update_wishlist, delete_wishlist, get_wishlists_by_user
+from app.schemas.wishlists import InsertWishlistRequest, UpdateWishlistRequest, WishlistResponse
 
 router = APIRouter(prefix="/wishlists", tags=["wishlists"])
 
@@ -30,3 +31,23 @@ async def update_wishlist_route(wishlist_id: int, wishlist_request: UpdateWishli
 @router.delete("/{wishlist_id}")
 async def delete_wishlist_route(wishlist_id: int, user_id: str = Depends(get_current_user_id)):
     delete_wishlist(user_id=user_id, wishlist_id=wishlist_id)
+
+
+@router.get("/", response_model=List[WishlistResponse])
+async def get_my_wishlists(user_id: str = Depends(get_current_user_id)):
+    # 1. Lấy dữ liệu thô từ DB
+    data = get_wishlists_by_user(user_id)
+    
+    # 2. Map dữ liệu vào Schema
+    results = []
+    for item in data:
+        results.append(WishlistResponse(
+            id=item["id"],
+            title=item["title"],
+            course_id=item["course_id"],
+            max_price=item["max_price"],
+            created_at=item["created_at"],
+            match_count=0
+        ))
+        
+    return results
