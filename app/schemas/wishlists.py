@@ -19,7 +19,6 @@ class WishlistResponse(BaseModel):
     id: int
     title: str
     course_id: int
-    name_course: Optional[str] = None
     max_price: int
     created_at: datetime
     match_count: int = 0
