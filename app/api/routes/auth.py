@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.auth import SignUpRequest, SignInRequest, SignInResponse, UpdatePhoneRequest, VerifyPhoneOtpRequest
+from app.schemas.auth import SignUpRequest, SignInRequest, SignInResponse, UpdatePhoneRequest, VerifyPhoneOtpRequest, SendPhoneOtpRequest
 from app.crud.profiles import insert_profile, get_profile, update_profile
-from app.crud.auth import sign_up, sign_in, sign_out, update_phone, verify_phone_otp
+from app.crud.auth import sign_up, sign_in, sign_out, update_phone, verify_phone_otp, send_phone_otp
 from app.utils.get_token import get_current_user_id
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -60,7 +60,11 @@ async def update_phone_route(update_phone_request: UpdatePhoneRequest, user_id: 
     update_profile(user_id=user_id, phone=update_phone_request.phone)
 
 
+@router.post("/send-phone-otp")
+async def send_phone_otp_route(send_phone_otp_request: SendPhoneOtpRequest, _: str = Depends(get_current_user_id)):
+    send_phone_otp(phone=send_phone_otp_request.phone)
+
 @router.post("/verify-phone-otp")
 async def verify_phone_otp_route(verify_phone_otp_request: VerifyPhoneOtpRequest, _: str = Depends(get_current_user_id)):
-    verify_phone_otp(phone=verify_phone_otp_request.phone,
-                     token=verify_phone_otp_request.token, type=verify_phone_otp_request.type)
+    return verify_phone_otp(phone=verify_phone_otp_request.phone,
+                     token=verify_phone_otp_request.token)

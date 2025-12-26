@@ -105,7 +105,7 @@ async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str
 async def cancel_post_route(post_id: int, _: str = Depends(get_current_user_id)):
     orders = get_orders_list(post_id=post_id, status="PENDING")
     for order in orders:
-        update_order(order_id=order["id"], status_id=3)
+        update_order(order_id=order["order_id"], status_id=3)
     update_post(post_id=post_id, status_id=4)
 
 

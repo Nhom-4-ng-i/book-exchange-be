@@ -5,7 +5,7 @@ router = APIRouter(prefix="/user", tags=["user"])
 
 
 @router.get("/me")
-def get_my_profile_route(user_id: str = Depends(get_current_user_id)):
+async def get_my_profile_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.profiles import get_profile
     from app.crud.posts import get_posts_list
     from app.crud.orders import get_orders_list
@@ -24,14 +24,21 @@ def get_my_profile_route(user_id: str = Depends(get_current_user_id)):
 
 
 @router.get("/posts")
-def get_my_posts_route(user_id: str = Depends(get_current_user_id)):
+async def get_my_posts_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.posts import get_posts_list
     posts = get_posts_list(seller_id=user_id)
     return posts
 
 
 @router.get("/orders")
-def get_my_orders_route(user_id: str = Depends(get_current_user_id)):
+async def get_my_orders_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.orders import get_orders_list
     orders = get_orders_list(buyer_id=user_id)
     return orders
+
+
+@router.get("/wishlists")
+async def get_my_wishlists_route(user_id: str = Depends(get_current_user_id)):
+    from app.crud.wishlists import get_wishlists_list
+    wishlists = get_wishlists_list(user_id=user_id)
+    return wishlists

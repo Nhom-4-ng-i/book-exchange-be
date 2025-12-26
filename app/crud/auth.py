@@ -19,24 +19,27 @@ def sign_in(email: str, password: str = "password"):
             "password": password
         }
     )
-
-
+    
 def sign_out():
     supabase = get_supabase()
     supabase.auth.sign_out()
-
-
+        
 def update_phone(phone: str):
     supabase = get_supabase()
     supabase.auth.update_user({
         "phone": phone
     })
-
-
-def verify_phone_otp(phone: str, token: str, type: str):
+    
+def send_phone_otp(phone: str):
     supabase = get_supabase()
-    supabase.auth.verify_otp({
+    supabase.auth.sign_in_with_otp({
+        "phone": phone
+    })
+
+def verify_phone_otp(phone: str, token: str):
+    supabase = get_supabase()
+    return supabase.auth.verify_otp({
         "phone": phone,
         "token": token,
-        "type": type
+        "type": "sms"
     })
