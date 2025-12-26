@@ -11,9 +11,9 @@ async def get_my_profile_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.orders import get_orders_list
 
     my_profile = get_profile(user_id=user_id)
-    count_posts = len(get_posts_list(seller_id=user_id))
-    count_bought_orders = len(get_orders_list(buyer_id=user_id))
-    count_sold_orders = len(get_orders_list(seller_id=user_id))
+    count_posts = len(get_posts_list(seller_id=user_id, status=["PENDING", "TRADING", "SOLD"]))
+    count_bought_orders = len(get_posts_list(seller_id=user_id, status="SOLD"))
+    count_sold_orders = len(get_orders_list(seller_id=user_id, status="COMPLETED"))
 
     return {
         **my_profile,
