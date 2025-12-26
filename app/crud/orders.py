@@ -1,30 +1,25 @@
 from app.services.supabase import get_supabase
-from typing import Optional
+from typing import Optional, List
+import datetime
 
 
 def get_orders_list(
     buyer_id: Optional[str] = None,
     seller_id: Optional[str] = None,
-    status: Optional[str] = None,
+    status: Optional[List[str]] = None,
     post_id: Optional[int] = None,
 ):
     supabase = get_supabase()
 
-    # Cập nhật query: Lấy thêm status_id và thông tin ng mua
-    # Cập nhật query: Lấy thêm status_id và thông tin ng mua
     query = (
         supabase
         .table("orders")
         .select(
             """
             id,
-            id,
             created_at,
-            status_id,
-            status_id,
             order_status(code, name),
-            buyer:profiles!buyer_id(name, phone), 
-            buyer:profiles!buyer_id(name, phone), 
+            buyer:profiles!buyer_id(name, phone),
             posts!inner(
                 book_title,
                 author,
@@ -39,8 +34,6 @@ def get_orders_list(
             )
             """
         )
-        .order("created_at", desc=True)
-        .order("created_at", desc=True)
     )
 
     if buyer_id:
@@ -50,7 +43,7 @@ def get_orders_list(
         query = query.eq("posts.seller_id", seller_id)
 
     if status:
-        query = query.eq("order_status.code", status)
+        query = query.in_("order_status.code", status)
 
     if post_id:
         query = query.eq("posts.id", post_id)
@@ -61,20 +54,12 @@ def get_orders_list(
     orders = []
     for row in raw_orders:
         post = row["posts"]
-        buyer = row.get("buyer") or {}
-        buyer = row.get("buyer") or {}
 
         orders.append({
             "order_id": row.get("id"),
-            "created_at": row.get("created_at"),
-            "status_id": row.get("status_id"),
+            "order_time": datetime.datetime.fromisoformat(row.get("created_at")).strftime("%d/%m/%Y %H:%M:%S"),
             "order_status": row.get("order_status", {}).get("name") if row.get("order_status") else None,
-            
-            # Thông tin người mua
-            "buyer_name": buyer.get("name"),
-            "buyer_phone": buyer.get("phone") if buyer.get("phone") else None,
-
-            # Thông tin bài đăng
+            "order_status_code": row.get("order_status", {}).get("code") if row.get("order_status") else None,
             "title": post["book_title"],
             "author": post["author"],
             "price": post["price"],
@@ -84,6 +69,9 @@ def get_orders_list(
             "book_status": post.get("book_status", {}).get("name") if post.get("book_status") else None,
             "post_status": post.get("post_status", {}).get("name") if post.get("post_status") else None,
             "seller_name": post.get("profiles", {}).get("name") if post.get("profiles") else None,
+            "seller_phone": post.get("profiles", {}).get("phone") if post.get("profiles") else None,
+            "buyer_name": row.get("buyer", {}).get("name") if row.get("buyer") else None,
+            "buyer_phone": row.get("buyer", {}).get("phone") if row.get("buyer") else None,
         })
 
     return orders

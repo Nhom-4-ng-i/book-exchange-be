@@ -100,7 +100,7 @@ async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str
         original_price=insert_post_request.original_price,
         description=insert_post_request.description
     )
-    
+
     # Check wishlists
     wishlists = get_wishlists_list(
         book_title=insert_post_request.book_title,
@@ -109,12 +109,13 @@ async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str
         seller_id=user_id,
     )
     for wishlist in wishlists:
-        insert_notification(user_id=wishlist["user_id"], title="WISHLIST", type_id=1, content=f"Đã tìm thấy bài đăng có sách {insert_post_request.book_title} bạn cần.")
+        insert_notification(user_id=wishlist["user_id"], title="WISHLIST", type_id=1,
+                            content=f"Đã tìm thấy bài đăng có sách {insert_post_request.book_title} bạn cần.")
 
 
 @router.post("/{post_id}/cancel")
 async def cancel_post_route(post_id: int, _: str = Depends(get_current_user_id)):
-    orders = get_orders_list(post_id=post_id, status="PENDING")
+    orders = get_orders_list(post_id=post_id, status=["PENDING"])
     for order in orders:
         update_order(order_id=order["order_id"], status_id=3)
     update_post(post_id=post_id, status_id=4)
