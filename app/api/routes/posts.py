@@ -19,7 +19,6 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 @router.get("/")
 async def get_posts_list_route(
-    status: Optional[List[str]] = Query(default=None),
     book_title: Optional[str] = Query(default=None),
     author: Optional[str] = Query(default=None),
     book_status: Optional[str] = Query(default=None),
@@ -33,7 +32,7 @@ async def get_posts_list_route(
     _: str = Depends(get_current_user_id),
 ):
     posts = get_posts_list(
-        status=status,
+        status="PENDING",
         book_title=book_title,
         author=author,
         book_status=book_status,
