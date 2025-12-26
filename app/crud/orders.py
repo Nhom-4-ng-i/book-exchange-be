@@ -55,16 +55,16 @@ def get_orders_list(
         orders.append({
             "order_id": row.get("id"),
             "created_at": row.get("created_at"),
-            "order_status": row.get("order_status", {}).get("name"),
+            "order_status": row.get("order_status", {}).get("name") if row.get("order_status") else None,
             "title": post["book_title"],
             "author": post["author"],
             "price": post["price"],
             "avatar_url": post.get("avatar_url"),
-            "course": post.get("courses", {}).get("name"),
-            "location": post.get("locations", {}).get("name"),
-            "book_status": post.get("book_status", {}).get("name"),
-            "post_status": post.get("post_status", {}).get("name"),
-            "seller_name": post.get("profiles", {}).get("name"),
+            "course": post.get("courses", {}).get("name") if post.get("courses") else None,
+            "location": post.get("locations", {}).get("name") if post.get("locations") else None,
+            "book_status": post.get("book_status", {}).get("name") if post.get("book_status") else None,
+            "post_status": post.get("post_status", {}).get("name") if post.get("post_status") else None,
+            "seller_name": post.get("profiles", {}).get("name") if post.get("profiles") else None,
         })
 
     return orders
@@ -95,4 +95,4 @@ def update_order(order_id: int, status_id: int):
         .eq("id", order_id)
         .execute()
     )
-    return response.data[0]
+    return response.data
