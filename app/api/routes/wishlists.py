@@ -41,13 +41,19 @@ async def get_my_wishlists(user_id: str = Depends(get_current_user_id)):
     # 2. Map dữ liệu vào Schema
     results = []
     for item in data:
+
+        course_info = item.get("courses") or {}
+        
         results.append(WishlistResponse(
             id=item["id"],
             title=item["title"],
             course_id=item["course_id"],
+            
+            name_course=course_info.get("name"), 
+            
             max_price=item["max_price"],
             created_at=item["created_at"],
-            match_count=0
+            match_count=0 
         ))
         
     return results
