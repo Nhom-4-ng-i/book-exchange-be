@@ -72,7 +72,7 @@ def get_orders_list(
             
             # Thông tin người mua
             "buyer_name": buyer.get("name"),
-            "buyer_phone": buyer.get("phone"),
+            "buyer_phone": buyer.get("phone") if buyer.get("phone") else None,
 
             # Thông tin bài đăng
             "title": post["book_title"],
