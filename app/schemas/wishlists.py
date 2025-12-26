@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 
 class InsertWishlistRequest(BaseModel):
@@ -12,3 +13,12 @@ class UpdateWishlistRequest(BaseModel):
     title: Optional[str] = None
     course_id: Optional[int] = None
     max_price: Optional[int] = None
+    
+
+class WishlistResponse(BaseModel):
+    id: int
+    title: str
+    course_id: int
+    max_price: int
+    created_at: datetime
+    match_count: int = 0
