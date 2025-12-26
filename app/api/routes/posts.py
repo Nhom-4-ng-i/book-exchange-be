@@ -11,6 +11,8 @@ from app.crud.orders import (
     get_orders_list,
     update_order
 )
+from app.crud.wishlists import get_wishlists_list
+from app.crud.notifications import insert_notification
 from typing import List, Optional
 
 
@@ -98,6 +100,16 @@ async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str
         original_price=insert_post_request.original_price,
         description=insert_post_request.description
     )
+    
+    # Check wishlists
+    wishlists = get_wishlists_list(
+        book_title=insert_post_request.book_title,
+        course_id=insert_post_request.course_id,
+        max_price=insert_post_request.price,
+        seller_id=user_id,
+    )
+    for wishlist in wishlists:
+        insert_notification(user_id=wishlist["user_id"], title="WISHLIST", type_id=1, content=f"Đã tìm thấy bài đăng có sách {insert_post_request.book_title} bạn cần.")
 
 
 @router.post("/{post_id}/cancel")

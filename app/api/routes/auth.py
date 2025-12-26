@@ -61,10 +61,10 @@ async def update_phone_route(update_phone_request: UpdatePhoneRequest, user_id: 
 
 
 @router.post("/send-phone-otp")
-async def send_phone_otp_route(send_phone_otp_request: SendPhoneOtpRequest, _: str = Depends(get_current_user_id)):
+async def send_phone_otp_route(send_phone_otp_request: SendPhoneOtpRequest):
     send_phone_otp(phone=send_phone_otp_request.phone)
 
 @router.post("/verify-phone-otp")
-async def verify_phone_otp_route(verify_phone_otp_request: VerifyPhoneOtpRequest, _: str = Depends(get_current_user_id)):
+async def verify_phone_otp_route(verify_phone_otp_request: VerifyPhoneOtpRequest):
     return verify_phone_otp(phone=verify_phone_otp_request.phone,
                      token=verify_phone_otp_request.token)
