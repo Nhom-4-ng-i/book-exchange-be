@@ -6,7 +6,7 @@ def get_courses_list():
     response = (
         supabase
         .table("courses")
-        .select("name")
+        .select("*")
         .execute()
     )
     return response.data
