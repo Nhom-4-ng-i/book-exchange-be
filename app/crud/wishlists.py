@@ -27,9 +27,9 @@ def delete_wishlist(user_id: str, wishlist_id: int):
 
 def get_wishlists_by_user(user_id: str):
     supabase = get_supabase()
-    # Lấy toàn bộ cột của wishlist theo user_id, sắp xếp mới nhất lên đầu
+    
     response = supabase.table("wishlists")\
-        .select("*")\
+        .select("*, courses(name)")\
         .eq("user_id", user_id)\
         .order("created_at", desc=True)\
         .execute()
