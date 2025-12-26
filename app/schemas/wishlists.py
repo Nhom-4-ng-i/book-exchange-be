@@ -13,12 +13,13 @@ class UpdateWishlistRequest(BaseModel):
     title: Optional[str] = None
     course_id: Optional[int] = None
     max_price: Optional[int] = None
-    
+
 
 class WishlistResponse(BaseModel):
     id: int
+    created_at: datetime
     title: str
     course_id: int
+    name_course: Optional[str] = None
     max_price: int
-    created_at: datetime
-    match_count: int = 0
+    user_id: str

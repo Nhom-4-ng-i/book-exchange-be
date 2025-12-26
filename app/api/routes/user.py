@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
+from typing import List
 from app.utils.get_token import get_current_user_id
+from app.schemas.wishlists import WishlistResponse
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -37,7 +39,7 @@ async def get_my_orders_route(user_id: str = Depends(get_current_user_id)):
     return orders
 
 
-@router.get("/wishlists")
+@router.get("/wishlists", response_model=List[WishlistResponse])
 async def get_my_wishlists_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.wishlists import get_wishlists_list
     wishlists = get_wishlists_list(user_id=user_id)
