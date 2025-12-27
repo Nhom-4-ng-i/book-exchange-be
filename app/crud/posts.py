@@ -1,6 +1,5 @@
 from typing import Optional, List
 from app.services.supabase import get_supabase
-from app.services.cloudinary_client import upload_image_to_cloudinary
 
 
 def _base_posts_query(supabase):
@@ -31,7 +30,7 @@ def _map_post_row(row: dict) -> dict:
         "book_status": (row.get("book_status") or {}).get("name"),
         "price": row["price"],
         "created_at": row["created_at"],
-        "avatar_url": row["avatar_url"],
+        "avatar_url": row.get("avatar_url"),
         "original_price": row["original_price"],
         "description": row["description"],
         "location_detail": row["location_detail"],
@@ -117,6 +116,7 @@ def insert_post(
     location_detail: Optional[str],
     original_price: Optional[int],
     description: Optional[str],
+    avatar_url: Optional[str] = None,
 ):
     supabase = get_supabase()
 
@@ -137,6 +137,8 @@ def insert_post(
         post["original_price"] = original_price
     if description is not None:
         post["description"] = description
+    if avatar_url is not None:
+        post["avatar_url"] = avatar_url
 
     supabase.table("posts").insert(post).execute()
 
@@ -153,6 +155,7 @@ def update_post(
     location_detail: Optional[str] = None,
     original_price: Optional[int] = None,
     description: Optional[str] = None,
+    avatar_url: Optional[str] = None,
 ):
     supabase = get_supabase()
 
@@ -178,5 +181,8 @@ def update_post(
         post["original_price"] = original_price
     if description is not None:
         post["description"] = description
+    if avatar_url is not None:  
+        post["avatar_url"] = avatar_url
 
-    supabase.table("posts").update(post).eq("id", post_id).execute()
+    if post:
+        supabase.table("posts").update(post).eq("id", post_id).execute()

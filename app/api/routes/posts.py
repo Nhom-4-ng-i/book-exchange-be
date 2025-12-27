@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, Form, File, UploadFile
+from fastapi.responses import JSONResponse
 from app.utils.get_token import get_current_user_id
 from app.schemas.posts import InsertPostRequest, UpdatePostRequest
 from app.crud.posts import (
@@ -14,6 +15,7 @@ from app.crud.orders import (
 from app.crud.wishlists import get_wishlists_list
 from app.crud.notifications import insert_notification
 from typing import List, Optional
+from app.services.cloudinary_client import upload_image_to_cloudinary
 
 
 router = APIRouter(prefix="/posts", tags=["posts"])
@@ -85,32 +87,104 @@ async def get_post_route(post_id: int, _: str = Depends(get_current_user_id)):
     return post
 
 
-@router.post("/")
-async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str = Depends(get_current_user_id)):
-    insert_post(
-        seller_id=user_id,
-        status_id=1,
-        book_title=insert_post_request.book_title,
-        author=insert_post_request.author,
-        course_id=insert_post_request.course_id,
-        book_status_id=insert_post_request.book_status_id,
-        price=insert_post_request.price,
-        location_id=insert_post_request.location_id,
-        location_detail=insert_post_request.location_detail,
-        original_price=insert_post_request.original_price,
-        description=insert_post_request.description
-    )
+# @router.post("/")
+# async def insert_post_route(insert_post_request: InsertPostRequest, user_id: str = Depends(get_current_user_id)):
+#     insert_post(
+#         seller_id=user_id,
+#         status_id=1,
+#         book_title=insert_post_request.book_title,
+#         author=insert_post_request.author,
+#         course_id=insert_post_request.course_id,
+#         book_status_id=insert_post_request.book_status_id,
+#         price=insert_post_request.price,
+#         location_id=insert_post_request.location_id,
+#         location_detail=insert_post_request.location_detail,
+#         original_price=insert_post_request.original_price,
+#         description=insert_post_request.description
+#     )
 
-    # Check wishlists
-    wishlists = get_wishlists_list(
-        book_title=insert_post_request.book_title,
-        course_id=insert_post_request.course_id,
-        max_price=insert_post_request.price,
-        seller_id=user_id,
-    )
-    for wishlist in wishlists:
-        insert_notification(user_id=wishlist["user_id"], title="WISHLIST", type_id=1,
-                            content=f"Đã tìm thấy bài đăng có sách {insert_post_request.book_title} bạn cần.")
+#     # Check wishlists
+#     wishlists = get_wishlists_list(
+#         book_title=insert_post_request.book_title,
+#         course_id=insert_post_request.course_id,
+#         max_price=insert_post_request.price,
+#         seller_id=user_id,
+#     )
+#     for wishlist in wishlists:
+#         insert_notification(user_id=wishlist["user_id"], title="WISHLIST", type_id=1,
+#                             content=f"Đã tìm thấy bài đăng có sách {insert_post_request.book_title} bạn cần.")
+
+
+@router.post("/")
+async def insert_post_route(
+    book_title: str = Form(...),
+    author: str = Form(...),
+    course_id: int = Form(...),
+    book_status_id: int = Form(...),
+    price: int = Form(...),
+    location_id: int = Form(...),
+    location_detail: Optional[str] = Form(None),
+    original_price: Optional[int] = Form(None),
+    description: Optional[str] = Form(None),
+    image: Optional[UploadFile] = File(None),
+    user_id: str = Depends(get_current_user_id)
+):
+    try:
+        # 1. Upload ảnh
+        avatar_url = None
+        if image:
+            avatar_url = upload_image_to_cloudinary(image)
+            # Kiểm tra nếu có file mà upload ra None thì báo lỗi luôn
+            if not avatar_url:
+                return JSONResponse(
+                    status_code=400,
+                    content={"code": "ERROR", "message": "Lỗi upload ảnh lên Cloudinary"}
+                )
+
+        # 2. Insert DB
+        insert_post(
+            seller_id=user_id,
+            status_id=1,
+            book_title=book_title,
+            author=author,
+            course_id=course_id,
+            book_status_id=book_status_id,
+            price=price,
+            location_id=location_id,
+            location_detail=location_detail,
+            original_price=original_price,
+            description=description,
+            avatar_url=avatar_url
+        )
+
+        # 3. Notification (Logic phụ, nếu lỗi cũng không nên chặn luồng chính, dùng try con)
+        try:
+            wishlists = get_wishlists_list(
+                book_title=book_title,
+                course_id=course_id,
+                max_price=price,
+                seller_id=user_id,
+            )
+            for wishlist in wishlists:
+                insert_notification(user_id=wishlist["user_id"], title="WISHLIST", type_id=1,
+                                    content=f"Đã tìm thấy bài đăng có sách {book_title} bạn cần.")
+        except Exception:
+            pass # Lỗi thông báo thì bỏ qua
+
+        return {
+            "code": "SUCCESS",
+            "message": "Đăng bài viết thành công"
+        }
+
+    except Exception as e:
+        print(f"Error insert post: {e}")
+        return JSONResponse(
+            status_code=400,
+            content={
+                "code": "ERROR",
+                "message": f"Có lỗi xảy ra: {str(e)}"
+            }
+        )
 
 
 @router.post("/{post_id}/cancel")
@@ -121,17 +195,75 @@ async def cancel_post_route(post_id: int, _: str = Depends(get_current_user_id))
     update_post(post_id=post_id, status_id=4)
 
 
+# @router.put("/{post_id}")
+# async def update_post_route(post_id: int, update_post_request: UpdatePostRequest, _: str = Depends(get_current_user_id)):
+#     update_post(
+#         post_id=post_id,
+#         book_title=update_post_request.book_title,
+#         author=update_post_request.author,
+#         course_id=update_post_request.course_id,
+#         book_status_id=update_post_request.book_status_id,
+#         price=update_post_request.price,
+#         location_id=update_post_request.location_id,
+#         location_detail=update_post_request.location_detail,
+#         original_price=update_post_request.original_price,
+#         description=update_post_request.description
+#     )
+
+
 @router.put("/{post_id}")
-async def update_post_route(post_id: int, update_post_request: UpdatePostRequest, _: str = Depends(get_current_user_id)):
-    update_post(
-        post_id=post_id,
-        book_title=update_post_request.book_title,
-        author=update_post_request.author,
-        course_id=update_post_request.course_id,
-        book_status_id=update_post_request.book_status_id,
-        price=update_post_request.price,
-        location_id=update_post_request.location_id,
-        location_detail=update_post_request.location_detail,
-        original_price=update_post_request.original_price,
-        description=update_post_request.description
-    )
+async def update_post_route(
+    post_id: int,
+    book_title: Optional[str] = Form(None),
+    author: Optional[str] = Form(None),
+    course_id: Optional[int] = Form(None),
+    book_status_id: Optional[int] = Form(None),
+    price: Optional[int] = Form(None),
+    location_id: Optional[int] = Form(None),
+    location_detail: Optional[str] = Form(None),
+    original_price: Optional[int] = Form(None),
+    description: Optional[str] = Form(None),
+    image: Optional[UploadFile] = File(None),
+    _: str = Depends(get_current_user_id)
+):
+    try:
+        # 1. Upload ảnh mới
+        avatar_url = None
+        if image:
+            avatar_url = upload_image_to_cloudinary(image)
+            if not avatar_url:
+                return JSONResponse(
+                    status_code=400,
+                    content={"code": "ERROR", "message": "Lỗi upload ảnh lên Cloudinary"}
+                )
+
+        # 2. Update DB
+        update_post(
+            post_id=post_id,
+            book_title=book_title,
+            author=author,
+            course_id=course_id,
+            book_status_id=book_status_id,
+            price=price,
+            location_id=location_id,
+            location_detail=location_detail,
+            original_price=original_price,
+            description=description,
+            avatar_url=avatar_url
+        )
+        
+        # --- TRẢ VỀ SUCCESS ---
+        return {
+            "code": "SUCCESS",
+            "message": "Cập nhật bài viết thành công"
+        }
+
+    except Exception as e:
+        # --- TRẢ VỀ ERROR ---
+        return JSONResponse(
+            status_code=400,
+            content={
+                "code": "ERROR",
+                "message": f"Lỗi cập nhật: {str(e)}"
+            }
+        )
