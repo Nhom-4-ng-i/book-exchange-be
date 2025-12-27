@@ -19,21 +19,21 @@ async def insert_order_route(order_request: InsertOrderRequest, user_id: str = D
 
 @router.post("/{order_id}/accept")
 async def accept_order_route(order_id: int, _: str = Depends(get_current_user_id)):
-    response = update_order(order_id=order_id, status_id=2)
-    update_post(post_id=response["post_id"], status_id=2)
+    response = update_order(order_id=order_id, status_id=2)[0]
+    update_post(post_id=int(response["post_id"]), status_id=2)
 
 
 @router.post("/{order_id}/reject")
 async def reject_order_route(order_id: int, _: str = Depends(get_current_user_id)):
-    update_order(order_id=order_id, status_id=3)
+    update_order(order_id=int(order_id), status_id=3)
 
 
 @router.post("/{order_id}/complete")
 async def complete_order_route(order_id: int, _: str = Depends(get_current_user_id)):
-    response = update_order(order_id=order_id, status_id=4)
-    update_post(post_id=response["post_id"], status_id=3)
+    response = update_order(order_id=order_id, status_id=4)[0]
+    update_post(post_id=int(response["post_id"]), status_id=3)
 
 
 @router.post("/{order_id}/cancel")
 async def cancel_order_route(order_id: int, _: str = Depends(get_current_user_id)):
-    update_order(order_id=order_id, status_id=5)
+    update_order(order_id=int(order_id), status_id=5)
