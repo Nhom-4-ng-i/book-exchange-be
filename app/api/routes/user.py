@@ -46,17 +46,20 @@ async def get_my_orders_route(user_id: str = Depends(get_current_user_id)):
 async def get_my_sales_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.orders import get_orders_list
     orders = get_orders_list(seller_id=user_id, status_code=[
-                             "PENDING", "ACCEPTED", "COMPLETED"])
+                             "PENDING", "ACCEPTED", "COMPLETED", "REJECTED"])
     pending_orders = [
         order for order in orders if order["order_status_code"] == "PENDING"]
     accepted_orders = [
         order for order in orders if order["order_status_code"] == "ACCEPTED"]
     completed_orders = [
         order for order in orders if order["order_status_code"] == "COMPLETED"]
+    rejected_orders = [
+        order for order in orders if order["order_status_code"] == "REJECTED"]
     return {
         "pending": pending_orders,
         "accepted": accepted_orders,
         "completed": completed_orders,
+        "rejected": rejected_orders,
     }
 
 
