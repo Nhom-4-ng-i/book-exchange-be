@@ -11,13 +11,13 @@ async def get_my_profile_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.orders import get_orders_list
 
     my_profile = get_profile(user_id=user_id)
-    my_posts = get_posts_list(seller_id=user_id, status=[
+    my_posts = get_posts_list(seller_id=user_id, status_code=[
                               "SELLING", "TRADING", "SOLD"])
     count_posts = len(my_posts)
     count_sold_posts = len(
-        [sold_post for sold_post in my_posts if sold_post["status"] == "SOLD"])
+        [sold_post for sold_post in my_posts if sold_post["status_code"] == "SOLD"])
     count_completed_orders = len(get_orders_list(
-        seller_id=user_id, status=["COMPLETED"]))
+        buyer_id=user_id, status_code=["COMPLETED"]))
 
     return {
         **my_profile,
@@ -30,7 +30,7 @@ async def get_my_profile_route(user_id: str = Depends(get_current_user_id)):
 @router.get("/posts")
 async def get_my_posts_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.posts import get_posts_list
-    posts = get_posts_list(seller_id=user_id, status=[
+    posts = get_posts_list(seller_id=user_id, status_code=[
                            "SELLING", "TRADING", "SOLD"])
     return posts
 
@@ -45,7 +45,7 @@ async def get_my_orders_route(user_id: str = Depends(get_current_user_id)):
 @router.get("/sales")
 async def get_my_sales_route(user_id: str = Depends(get_current_user_id)):
     from app.crud.orders import get_orders_list
-    orders = get_orders_list(seller_id=user_id, status=[
+    orders = get_orders_list(seller_id=user_id, status_code=[
                              "PENDING", "ACCEPTED", "COMPLETED"])
     pending_orders = [
         order for order in orders if order["order_status_code"] == "PENDING"]

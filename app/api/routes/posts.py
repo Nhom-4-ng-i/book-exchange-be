@@ -36,7 +36,7 @@ async def get_posts_list_route(
     _: str = Depends(get_current_user_id),
 ):
     posts = get_posts_list(
-        status="PENDING",
+        status_code=["PENDING"],
         book_title=book_title,
         author=author,
         book_status=book_status,
@@ -189,7 +189,7 @@ async def insert_post_route(
 
 @router.post("/{post_id}/cancel")
 async def cancel_post_route(post_id: int, _: str = Depends(get_current_user_id)):
-    orders = get_orders_list(post_id=post_id, status=["PENDING"])
+    orders = get_orders_list(post_id=post_id, status_code=["PENDING"])
     for order in orders:
         update_order(order_id=order["order_id"], status_id=3)
     update_post(post_id=post_id, status_id=4)

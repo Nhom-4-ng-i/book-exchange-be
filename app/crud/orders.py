@@ -6,7 +6,7 @@ import datetime
 def get_orders_list(
     buyer_id: Optional[str] = None,
     seller_id: Optional[str] = None,
-    status: Optional[List[str]] = None,
+    status_code: Optional[List[str]] = None,
     post_id: Optional[int] = None,
 ):
     supabase = get_supabase()
@@ -18,7 +18,7 @@ def get_orders_list(
             """
             id,
             created_at,
-            order_status(code, name),
+            order_status!inner(code, name),
             buyer:profiles!buyer_id(name, phone),
             posts!inner(
                 book_title,
@@ -26,11 +26,11 @@ def get_orders_list(
                 price,
                 avatar_url,
                 seller_id,
-                courses(name),
-                locations(name),
-                book_status(name),
-                post_status(name),
-                profiles(name)
+                courses!inner(name),
+                locations!inner(name),
+                book_status!inner(name),
+                post_status!inner(name),
+                profiles!inner(name)
             )
             """
         )
@@ -42,8 +42,8 @@ def get_orders_list(
     if seller_id:
         query = query.eq("posts.seller_id", seller_id)
 
-    if status:
-        query = query.in_("order_status.code", status)
+    if status_code:
+        query = query.in_("order_status.code", status_code)
 
     if post_id:
         query = query.eq("posts.id", post_id)
@@ -67,7 +67,9 @@ def get_orders_list(
             "course": post.get("courses", {}).get("name") if post.get("courses") else None,
             "location": post.get("locations", {}).get("name") if post.get("locations") else None,
             "book_status": post.get("book_status", {}).get("name") if post.get("book_status") else None,
+            "book_status_code": post.get("book_status", {}).get("code") if post.get("book_status") else None,
             "post_status": post.get("post_status", {}).get("name") if post.get("post_status") else None,
+            "post_status_code": post.get("post_status", {}).get("code") if post.get("post_status") else None,
             "seller_name": post.get("profiles", {}).get("name") if post.get("profiles") else None,
             "seller_phone": post.get("profiles", {}).get("phone") if post.get("profiles") else None,
             "buyer_name": row.get("buyer", {}).get("name") if row.get("buyer") else None,

@@ -9,11 +9,11 @@ def _base_posts_query(supabase):
         .select(
             """
             *,
-            courses(name),
-            locations(name),
-            book_status(code, name),
-            post_status(code, name),
-            profiles(name)
+            courses!inner(name),
+            locations!inner(name),
+            book_status!inner(code, name),
+            post_status!inner(code, name),
+            profiles!inner(name)
             """
         )
     )
@@ -23,6 +23,7 @@ def _map_post_row(row: dict) -> dict:
     return {
         "id": row["id"],
         "status": (row.get("post_status") or {}).get("name"),
+        "status_code": (row.get("post_status") or {}).get("code"),
         "book_title": row["book_title"],
         "author": row["author"],
         "course": (row.get("courses") or {}).get("name"),
@@ -39,7 +40,7 @@ def _map_post_row(row: dict) -> dict:
 
 
 def get_posts_list(
-    status: Optional[List[str]] = None,
+    status_code: Optional[List[str]] = None,
     book_title: Optional[str] = None,
     author: Optional[str] = None,
     book_status: Optional[str] = None,
@@ -53,8 +54,8 @@ def get_posts_list(
 
     query = _base_posts_query(supabase)
 
-    if status is not None:
-        query = query.in_("post_status.code", status)
+    if status_code is not None:
+        query = query.in_("post_status.code", status_code)
 
     if book_title is not None:
         query = query.text_search("book_title", f"'{book_title}'")
