@@ -9,11 +9,28 @@ def _base_posts_query(supabase):
         .select(
             """
             *,
-            courses!inner(name),
-            locations!inner(name),
-            book_status!inner(code, name),
-            post_status!inner(code, name),
-            profiles!inner(name)
+            courses(name),
+            locations(name),
+            book_status(code, name),
+            post_status(code, name),
+            profiles(name)
+            """
+        )
+    )
+    
+    
+def _post_query_user(supabase):
+    return (
+        supabase
+        .table("posts")
+        .select(
+            """
+            *,
+            courses(name),
+            locations(name),
+            book_status(code, name),
+            post_status!(code, name),
+            profiles(name)
             """
         )
     )
@@ -51,8 +68,11 @@ def get_posts_list(
     seller_id: Optional[str] = None,
 ):
     supabase = get_supabase()
-
-    query = _base_posts_query(supabase)
+    
+    if status_code is ["SELLING", "TRADING", "SOLD"]:
+        query = _post_query_user(supabase)
+    else:
+        query = _base_posts_query(supabase)
 
     if status_code is not None:
         query = query.in_("post_status.code", status_code)
