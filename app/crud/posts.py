@@ -57,9 +57,6 @@ def get_posts_list(
     if status_code is not None:
         query = query.in_("post_status.code", status_code)
 
-    if book_title is not None:
-        query = query.text_search("book_title", f"'{book_title}'")
-
     if author is not None:
         query = query.eq("author", author)
 
@@ -80,6 +77,9 @@ def get_posts_list(
 
     if seller_id is not None:
         query = query.eq("seller_id", seller_id)
+        
+    if book_title is not None:
+        query = query.text_search("book_title", f"'{book_title}'")
 
     response = query.execute()
     raw_posts = response.data or []
