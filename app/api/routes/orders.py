@@ -1,11 +1,18 @@
 from fastapi import APIRouter, Depends
-from app.crud.orders import insert_order, update_order
+from app.crud.orders import get_order, insert_order, update_order
 from app.crud.posts import update_post
 from app.schemas.orders import InsertOrderRequest
 from app.utils.get_token import get_current_user_id
 
 
 router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+@router.get("/{order_id}")
+async def get_order_route(order_id: int, _: str = Depends(get_current_user_id)):
+    order = get_order(id=order_id)
+    
+    return get_order(id=order_id)
 
 
 @router.post("/")

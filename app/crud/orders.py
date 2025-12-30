@@ -78,6 +78,59 @@ def get_orders_list(
 
     return orders
 
+def get_order(id: int):
+    supabase = get_supabase()
+    response = (
+        supabase
+        .table("orders")
+        .select(
+            """
+            *,
+            order_status(code, name),
+            profiles(name, phone),
+            buyer:profiles!buyer_id(name, phone),
+            posts(
+                book_title,
+                author,
+                price,
+                avatar_url,
+                seller_id,
+                courses!inner(name),
+                locations!inner(name),
+                book_status!inner(name, code),
+                post_status!inner(name, code),
+                profiles!inner(name)
+            )
+            """
+        )
+        .eq("id", id)
+        .execute()
+    )
+    if response.data:
+        raw = response.data[0]
+        post = raw["posts"]
+        order = {
+            "order_id": raw.get("id"),
+            "order_time": datetime.datetime.fromisoformat(raw.get("created_at")).strftime("%d/%m/%Y %H:%M:%S"),
+            "order_status": raw.get("order_status", {}).get("name") if raw.get("order_status") else None,
+            "order_status_code": raw.get("order_status", {}).get("code") if raw.get("order_status") else None,
+            "title": post["book_title"],
+            "author": post["author"],
+            "price": post["price"],
+            "avatar_url": post.get("avatar_url"),
+            "course": post.get("courses", {}).get("name") if post.get("courses") else None,
+            "location": post.get("locations", {}).get("name") if post.get("locations") else None,
+            "book_status": post.get("book_status", {}).get("name") if post.get("book_status") else None,
+            "book_status_code": post.get("book_status", {}).get("code") if post.get("book_status") else None,
+            "post_status": post.get("post_status", {}).get("name") if post.get("post_status") else None,
+            "post_status_code": post.get("post_status", {}).get("code") if post.get("post_status") else None,
+            "seller_name": post.get("profiles", {}).get("name") if post.get("profiles") else None,
+            "seller_phone": post.get("profiles", {}).get("phone") if post.get("profiles") else None,
+            "buyer_name": raw.get("buyer", {}).get("name") if raw.get("buyer") else None,
+            "buyer_phone": raw.get("buyer", {}).get("phone") if raw.get("buyer") else None,
+        }
+        return order
+    return None
 
 def insert_order(post_id: int, buyer_id: str, buyer_note: Optional[str] = None):
     supabase = get_supabase()
