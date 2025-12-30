@@ -28,9 +28,9 @@ def get_orders_list(
                 seller_id,
                 courses!inner(name),
                 locations!inner(name),
-                book_status!inner(name),
-                post_status!inner(name),
-                profiles!inner(name)
+                book_status!inner(name, code),
+                post_status!inner(name, code),
+                profiles!inner(name, phone)
             )
             """
         )
@@ -78,6 +78,7 @@ def get_orders_list(
 
     return orders
 
+
 def get_order(id: int):
     supabase = get_supabase()
     response = (
@@ -99,7 +100,7 @@ def get_order(id: int):
                 locations!inner(name),
                 book_status!inner(name, code),
                 post_status!inner(name, code),
-                profiles!inner(name)
+                profiles!inner(name, phone)
             )
             """
         )
@@ -131,6 +132,7 @@ def get_order(id: int):
         }
         return order
     return None
+
 
 def insert_order(post_id: int, buyer_id: str, buyer_note: Optional[str] = None):
     supabase = get_supabase()
