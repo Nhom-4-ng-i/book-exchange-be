@@ -11,9 +11,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def sign_up_route(auth_request: SignUpRequest):
     email = auth_request.email
     name = auth_request.name
+    password = auth_request.password
 
     try:
-        response = sign_up(email=email)
+        response = sign_up(email=email, password=password)
 
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
@@ -26,9 +27,10 @@ async def sign_up_route(auth_request: SignUpRequest):
 @router.post("/sign-in", response_model=SignInResponse)
 async def sign_in_route(auth_request: SignInRequest):
     email = auth_request.email
+    password = auth_request.password
 
     try:
-        response = sign_in(email=email)
+        response = sign_in(email=email, password=password)
 
         access_token = getattr(response.session, "access_token", None)
         user_id = getattr(response.user, "id", None)
@@ -64,7 +66,8 @@ async def update_phone_route(update_phone_request: UpdatePhoneRequest, user_id: 
 async def send_phone_otp_route(send_phone_otp_request: SendPhoneOtpRequest):
     send_phone_otp(phone=send_phone_otp_request.phone)
 
+
 @router.post("/verify-phone-otp")
 async def verify_phone_otp_route(verify_phone_otp_request: VerifyPhoneOtpRequest):
     return verify_phone_otp(phone=verify_phone_otp_request.phone,
-                     token=verify_phone_otp_request.token)
+                            token=verify_phone_otp_request.token)
