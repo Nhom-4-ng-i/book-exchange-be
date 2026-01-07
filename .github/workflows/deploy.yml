@@ -57,4 +57,7 @@ jobs:
             docker pull gragy08/book-exchange-be:latest
 
             # Run new container
-            docker run -d -p 8000:8000 --name fastapi_server gragy08/book-exchange-be:latest
+            docker run -d -p 8000:8000 \
+            --env-file /root/book-exchange.env \
+            --name fastapi_server \
+            gragy08/book-exchange-be:latest
