@@ -1,0 +1,59 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # chỉ chạy sau khi job CI test/lint thành công
+    needs: [ci]    # đổi thành tên job CI của bạn nếu cần
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # 1. Đăng nhập Docker Hub
+      - name: Log in to Docker Hub
+      # sử dụng action login để tránh lộ mật khẩu:contentReference[oaicite:1]{index=1}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 2. Đặt tag cho image. Có thể dùng commit hash hoặc số build
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: gragy08/book-exchange-be
+
+      # 3. Build và push Docker image lên Docker Hub
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}  # tự sinh tags (latest + sha):contentReference[oaicite:2]{index=2}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # 4. SSH vào VPS để triển khai
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            # dừng và xóa container cũ nếu tồn tại
+            if [ $(docker ps -q -f name=fastapi_server) ]; then
+              docker stop fastapi_server
+              docker rm -f fastapi_server
+            fi
+            # kéo image mới nhất
+            docker pull gragy08/book-exchange-be:latest
+            # chạy container mới
+            docker run -d -p 8000:8000 --name fastapi_server gragy08/book-exchange-be:latest
