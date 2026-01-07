@@ -8,38 +8,38 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # chỉ chạy sau khi job CI test/lint thành công
-    needs: [ci]    # đổi thành tên job CI của bạn nếu cần
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 1. Đăng nhập Docker Hub
+      # 1) Login Docker Hub
       - name: Log in to Docker Hub
-      # sử dụng action login để tránh lộ mật khẩu:contentReference[oaicite:1]{index=1}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 2. Đặt tag cho image. Có thể dùng commit hash hoặc số build
+      # 2) Generate tags (latest + sha)
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: gragy08/book-exchange-be
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
 
-      # 3. Build và push Docker image lên Docker Hub
+      # 3) Build & push
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}  # tự sinh tags (latest + sha):contentReference[oaicite:2]{index=2}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # 4. SSH vào VPS để triển khai
+      # 4) Deploy via SSH (password)
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -48,12 +48,13 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: 22
           script: |
-            # dừng và xóa container cũ nếu tồn tại
-            if [ $(docker ps -q -f name=fastapi_server) ]; then
-              docker stop fastapi_server
+            # Stop & remove old container if exists
+            if docker ps -a --format '{{.Names}}' | grep -q '^fastapi_server$'; then
               docker rm -f fastapi_server
             fi
-            # kéo image mới nhất
+
+            # Pull newest image
             docker pull gragy08/book-exchange-be:latest
-            # chạy container mới
+
+            # Run new container
             docker run -d -p 8000:8000 --name fastapi_server gragy08/book-exchange-be:latest
