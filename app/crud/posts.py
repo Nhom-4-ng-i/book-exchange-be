@@ -13,12 +13,12 @@ def _base_posts_query(supabase):
             locations(name),
             book_status(code, name),
             post_status(code, name),
-            profiles(name)
+            profiles(name, phone)
             """
         )
     )
-    
-    
+
+
 def _post_query_user(supabase):
     return (
         supabase
@@ -30,13 +30,14 @@ def _post_query_user(supabase):
             locations(name),
             book_status(code, name),
             post_status!(code, name),
-            profiles(name)
+            profiles(name, phone)
             """
         )
     )
 
 
 def _map_post_row(row: dict) -> dict:
+    print(row)
     return {
         "id": row["id"],
         "status": (row.get("post_status") or {}).get("name"),
@@ -53,6 +54,7 @@ def _map_post_row(row: dict) -> dict:
         "description": row["description"],
         "location_detail": row["location_detail"],
         "seller_name": (row.get("profiles") or {}).get("name"),
+        "seller_phone": (row.get("profiles") or {}).get("phone"),
     }
 
 
@@ -68,7 +70,7 @@ def get_posts_list(
     seller_id: Optional[str] = None,
 ):
     supabase = get_supabase()
-    
+
     if status_code is ["SELLING", "TRADING", "SOLD"]:
         query = _post_query_user(supabase)
     else:
@@ -97,7 +99,7 @@ def get_posts_list(
 
     if seller_id is not None:
         query = query.eq("seller_id", seller_id)
-        
+
     if book_title is not None:
         query = query.text_search("book_title", f"'{book_title}'")
 
@@ -202,7 +204,7 @@ def update_post(
         post["original_price"] = original_price
     if description is not None:
         post["description"] = description
-    if avatar_url is not None:  
+    if avatar_url is not None:
         post["avatar_url"] = avatar_url
 
     if post:

@@ -65,6 +65,7 @@ async def get_posts_list_route(
             "id": post["id"],
             "status": post["status"],
             "seller_name": post["seller_name"],
+            "seller_phone": post["seller_phone"],
             "title": post["book_title"],
             "author": post["author"],
             "price": post["price"],
@@ -138,7 +139,8 @@ async def insert_post_route(
             if not avatar_url:
                 return JSONResponse(
                     status_code=400,
-                    content={"code": "ERROR", "message": "Lỗi upload ảnh lên Cloudinary"}
+                    content={"code": "ERROR",
+                             "message": "Lỗi upload ảnh lên Cloudinary"}
                 )
 
         # 2. Insert DB
@@ -169,7 +171,7 @@ async def insert_post_route(
                 insert_notification(user_id=wishlist["user_id"], title="WISHLIST", type_id=1,
                                     content=f"Đã tìm thấy bài đăng có sách {book_title} bạn cần.")
         except Exception:
-            pass # Lỗi thông báo thì bỏ qua
+            pass  # Lỗi thông báo thì bỏ qua
 
         return {
             "code": "SUCCESS",
@@ -234,7 +236,8 @@ async def update_post_route(
             if not avatar_url:
                 return JSONResponse(
                     status_code=400,
-                    content={"code": "ERROR", "message": "Lỗi upload ảnh lên Cloudinary"}
+                    content={"code": "ERROR",
+                             "message": "Lỗi upload ảnh lên Cloudinary"}
                 )
 
         # 2. Update DB
@@ -251,7 +254,7 @@ async def update_post_route(
             description=description,
             avatar_url=avatar_url
         )
-        
+
         # --- TRẢ VỀ SUCCESS ---
         return {
             "code": "SUCCESS",
