@@ -37,7 +37,6 @@ def _post_query_user(supabase):
 
 
 def _map_post_row(row: dict) -> dict:
-    print(row)
     return {
         "id": row["id"],
         "status": (row.get("post_status") or {}).get("name"),
